@@ -1,0 +1,6 @@
+C:\inetpub\wwwroot\Tree\NeuralNetwork\bin\Debug\NeuralNetwork.exe.config
+C:\inetpub\wwwroot\Tree\NeuralNetwork\obj\Debug\NeuralNetwork.csprojResolveAssemblyReference.cache
+C:\inetpub\wwwroot\Tree\NeuralNetwork\bin\Debug\NeuralNetwork.exe
+C:\inetpub\wwwroot\Tree\NeuralNetwork\bin\Debug\NeuralNetwork.pdb
+C:\inetpub\wwwroot\Tree\NeuralNetwork\obj\Debug\NeuralNetwork.exe
+C:\inetpub\wwwroot\Tree\NeuralNetwork\obj\Debug\NeuralNetwork.pdb
