@@ -11,13 +11,18 @@ namespace NeuralNetwork.neuron
     {
         static Random rand = new Random();
         public double[] weights { get; set; }
+
+        public int weightsHashCode = 0;
         public double[] previousChangeDelta { get; set; }
         public double[] doubleInputs { get; set; }
+
+        public double backPropogationError { get; set; }
         public Neuron[] neuronInputs { get; set; }
+
+        public double cachedOutput = 0;
 
         public double BIAS = 1.0;
         public double BIAS_WEIGHT = 0.5;
-
 
         public ActivationFunction activationFunction = new Sigmoid();
 
@@ -26,6 +31,7 @@ namespace NeuralNetwork.neuron
         public Neuron(ActivationFunction activationFunction) 
         {
             this.activationFunction = activationFunction;
+            backPropogationError = 0;
             BIAS_WEIGHT = rand.Next(-100, 100) / 100.0;
         }
 
@@ -83,9 +89,32 @@ namespace NeuralNetwork.neuron
             this.neuronInputs = inputs;
         }
 
+        public double[] GetInputs()
+        {
+            if(this.doubleInputs != null && this.doubleInputs.Length != 0)
+            {
+                return this.doubleInputs;
+            }
+            else if(this.neuronInputs != null && this.neuronInputs.Length != 0)
+            {
+                double[] inputs = new double[this.neuronInputs.Length];
+                for(int i = 0; i < inputs.Length; i++)
+                {
+                    inputs[i] = this.neuronInputs[i].GetOutput();
+                }
+                return inputs;
+            }
+            throw new Exception("INPUTS ARE ALL NULL");
+        }
+
         public double GetOutput()
         {
             double sum = 0;
+
+            if (this.weights.GetHashCode() + this.BIAS_WEIGHT.GetHashCode() == this.weightsHashCode)
+            {
+                return this.cachedOutput;
+            }
 
             if (doubleInputs != null)
             {
@@ -101,8 +130,25 @@ namespace NeuralNetwork.neuron
                     sum += neuronInputs[i].GetOutput() * weights[i];
                 }
             }
-            sum += BIAS * BIAS_WEIGHT;
-            return this.activationFunction.GetResult(sum);
-        }  
+
+            if (!isInputLayer())
+            {
+                //Input Layer Does not use Bias
+                sum += BIAS * BIAS_WEIGHT;
+            }
+            double output = this.activationFunction.GetResult(sum);
+            this.cachedOutput = output;
+            this.weightsHashCode = this.weights.GetHashCode() + BIAS_WEIGHT.GetHashCode();
+            return output;
+        }
+  
+        public bool isInputLayer()
+        {
+            if (this.doubleInputs == null || this.doubleInputs.Length == 0)
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }
