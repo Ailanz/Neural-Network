@@ -15,15 +15,21 @@ namespace NeuralNetwork.teach
     {
         Network network;
         static double LEARN_RATE = 0.30;
-        static double MOMENTUM = 0.01;
+        static double MOMENTUM = 0.1;
         static Random random = new Random();
         const int RANDOM_SAMPLE = 5;
+        public delegate void Callback(Network network, List<double[]> inputs, List<double[]> targets, int repetition);
+
         public Trainer(Network network)
         {
             this.network = network;
         }
-
         public double Train(List<double[]> inputs, List<double[]> targets, double precision)
+        {
+            return Train(inputs, targets, precision, null);
+        }
+
+        public double Train(List<double[]> inputs, List<double[]> targets, double precision, Callback callback)
         {
             //precision in decimal
             Stopwatch stopWatch = new Stopwatch();
@@ -40,33 +46,25 @@ namespace NeuralNetwork.teach
                     errorRate += Train(inputs[i], targets[i]);
                 }
                 errorRate = errorRate / inputs.Count();
-                if (repetition % 3 == 0)
+                if (repetition % 5 == 0)
                 {
                     TimeSpan ts = stopWatch.Elapsed;
                     string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
                     ts.Hours, ts.Minutes, ts.Seconds,
                     ts.Milliseconds / 10);
                     stopWatch.Restart();
-                    //CREATE IMAGE
+                    
+                    if(callback!=null)
+                    {
+                        callback(this.network, inputs, targets, repetition);
+                    }
 
-                    network.SetInputs(inputs[0]);
-                    double[] xyz = network.GetOutputsAsDoubleArray();
-                    double[] outputs1 =  Normalizer.Denormalize(network.GetOutputsAsDoubleArray(), 0, 255);
-                    Bitmap createdImage = ImageHelper.DoubleArrayToBitmap(outputs1, 25, 25);
-                    createdImage.Save("C:\\Users\\Ailan\\Pictures\\test\\TEST" + repetition +".png");
-
-                    network.SetInputs(inputs[1]);
-                    double[] outputs2 =Normalizer.Denormalize(network.GetOutputsAsDoubleArray(), 0, 255);
-                    createdImage = ImageHelper.DoubleArrayToBitmap(outputs2, 25, 25);
-                    createdImage.Save("C:\\Users\\Ailan\\Pictures\\test\\TEST-" + repetition + ".png");
-
-                    Console.WriteLine("Error Rate: " + errorRate + " Time: " + elapsedTime + 
-                        " is Equal: " +Program.isEqual(outputs1,outputs2) + ", " + Program.isEqual(inputs[0], inputs[1]));
-
+                    Console.WriteLine("Error Rate: " + errorRate + " Time: " + elapsedTime);
+                    //Console.WriteLine("Error Rate: " + errorRate);
                 }
                 repetition++;
             }
-            Console.WriteLine("Stopped at: " + repetition);
+            Console.WriteLine("Stopped at: " + repetition + " with error: " + errorRate);
             return errorRate;
         }
 
@@ -102,56 +100,49 @@ namespace NeuralNetwork.teach
                 totalError += result;
             }
             return Math.Round(totalError / RANDOM_SAMPLE, 4);
-
-            //double maxError = 0;
-            //double output = outputs[0].GetOutput();
-            //double result = Math.Sqrt(Math.Abs(targets[0] * targets[0] - output * output));
-            //if (result > maxError)
-            //{
-            //    maxError = result;
-            //}
-
-            //return Math.Round(Math.Abs(maxError), 4);
         }
 
         public void TrainOutputLayer(double[] targets)
         {
+            int stepCount = 0;
             Neuron[] neuronsToTrain = this.network.GetOutputNeurons();
             for (int i = 0; i < neuronsToTrain.Length; i++)
             {
                 Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
-    
+
                 double output = neuronsToTrain[i].GetOutput(); //0.14
                 double error = neuronsToTrain[i].activationFunction.GetSquashFunction(output) * (targets[i] - output);
                 double[] inputs = neuronsToTrain[i].GetInputs(); //0.15
 
-                
-                TimeSpan ts = stopWatch.Elapsed;
-                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                ts.Hours, ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
-               // Console.WriteLine("FOR1 Time: " + elapsedTime + " : " + i);
-                stopWatch.Restart();
 
                 for (int j = 0; j < neuronsToTrain[i].weights.Length; j++)
                 {
-                    double changeDelta = (error * inputs[j]) * LEARN_RATE;// +neuronsToTrain[i].previousChangeDelta[j] * MOMENTUM;
+                    double changeDelta = (error * inputs[j]) * LEARN_RATE +neuronsToTrain[i].previousChangeDelta[j] * MOMENTUM;
                     //Modify each weight
                     neuronsToTrain[i].neuronInputs[j].backPropogationError += error * neuronsToTrain[i].weights[j];
 
                     neuronsToTrain[i].weights[j] += changeDelta;
-                    //neuronsToTrain[i].previousChangeDelta[j] = changeDelta;
+                    stepCount++;
+                    neuronsToTrain[i].previousChangeDelta[j] = changeDelta;
                     //Propogate the error back to previous layer neuron
                 }
                 //Modify Bias
                 ModifyBias(neuronsToTrain[i], error);
+                TimeSpan ts = stopWatch.Elapsed;
+                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                ts.Hours, ts.Minutes, ts.Seconds,
+                ts.Milliseconds / 10);
+                //Console.WriteLine("FOR1 Time: " + elapsedTime + " : " + i);
+                stopWatch.Restart();
             }
-            
+            Console.WriteLine(neuronsToTrain.Length + " * " + neuronsToTrain[0].weights.Length + " = " + stepCount);
+
         }
 
         public void TrainLayerNeurons(Neuron[] neurons)
         {
+            int stepCount = 0;
             for (int i = 0; i < neurons.Length; i++)
             {
                 double output = neurons[i].GetOutput();
@@ -161,7 +152,7 @@ namespace NeuralNetwork.teach
 
                 for (int j = 0; j < neurons[i].weights.Length; j++)
                 {
-                    double changeDelta = (error * inputs[j]) * LEARN_RATE + neurons[i].previousChangeDelta[j] * MOMENTUM;                    
+                    double changeDelta = (error * inputs[j]) * LEARN_RATE + neurons[i].previousChangeDelta[j] * MOMENTUM;
                     //Propogate the error back to previous layer neuron
                     if (!neurons[i].isInputLayer())
                     {
@@ -170,10 +161,13 @@ namespace NeuralNetwork.teach
                     //Modify each weight
                     neurons[i].weights[j] += changeDelta;
                     neurons[i].previousChangeDelta[j] = changeDelta;
+                    stepCount++;
+
                 }
                 //Modify Bias
                 ModifyBias(neurons[i], error);
             }
+            //Console.WriteLine(neurons.Length + " * " + neurons[0].weights.Length + " = " + stepCount);
         }
         [Obsolete]
         public void TrainHiddenLayer(double error, Neuron[] neuronToTrain)
@@ -194,7 +188,7 @@ namespace NeuralNetwork.teach
                     if (neuronToTrain[i].neuronInputs != null)
                     {
                         //Recurse on neuron inputs to correct weights
-                        TrainHiddenLayer(error * (neuronToTrain[i].weights[j]- changeDelta), new Neuron[] { neuronToTrain[i].neuronInputs[j] });
+                        TrainHiddenLayer(error * (neuronToTrain[i].weights[j] - changeDelta), new Neuron[] { neuronToTrain[i].neuronInputs[j] });
                     }
                 }
                 //Modify Bias

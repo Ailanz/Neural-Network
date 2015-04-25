@@ -17,12 +17,12 @@ namespace NeuralNetwork.neuron
         public Network() { }
 
         //If no Activation Function is declared, it will use Sigmoid as default
-        public Network(int numInputs, int numInputLayer, int numHiddenLayers,  int numSecondHiddenLayerNeurons, int numOutputs) 
-            : this(numInputs, numInputLayer, numHiddenLayers, numSecondHiddenLayerNeurons, numOutputs, Sigmoid.GetInstance())
+        public Network(int numInputLayer, int numHiddenLayers,  int numSecondHiddenLayerNeurons, int numOutputs) 
+            : this(numInputLayer, numHiddenLayers, numSecondHiddenLayerNeurons, numOutputs, Sigmoid.GetInstance())
         {           
         }
 
-        public Network(int numInputs, int numInputLayer, int numHiddenLayers, int numSecondHiddenLayerNeurons, int numOutputs, ActivationFunction activationFunction)
+        public Network(int numInputLayer, int numHiddenLayers, int numSecondHiddenLayerNeurons, int numOutputs, ActivationFunction activationFunction)
         {
             inputLayerNeurons = new Neuron[numInputLayer];
             hiddenLayerNeurons = new Neuron[numHiddenLayers];
@@ -31,7 +31,7 @@ namespace NeuralNetwork.neuron
 
             for (int i = 0; i < numInputLayer; i++)
             {
-                inputLayerNeurons[i] = new Neuron(numInputs, activationFunction);
+                inputLayerNeurons[i] = new Neuron(numInputLayer, activationFunction);
             }
 
             for (int i = 0; i < numHiddenLayers; i++)
@@ -94,22 +94,22 @@ namespace NeuralNetwork.neuron
         {
             for (int i = 0; i < inputLayerNeurons.Length; i++)
             {
-                inputLayerNeurons[i].weightsHashCode = 0;
+                inputLayerNeurons[i].weightsHashCode = -1;
             }
 
             for (int i = 0; i < hiddenLayerNeurons.Length; i++)
             {
-                hiddenLayerNeurons[i].weightsHashCode = 0;
+                hiddenLayerNeurons[i].weightsHashCode = -1;
             }
 
             for (int i = 0; i < secondHiddenLayerNeurons.Length; i++)
             {
-                secondHiddenLayerNeurons[i].weightsHashCode = 0;
+                secondHiddenLayerNeurons[i].weightsHashCode = -1;
             }
 
             for (int i = 0; i < outputLayerNeurons.Length; i++)
             {
-                outputLayerNeurons[i].weightsHashCode = 0;
+                outputLayerNeurons[i].weightsHashCode = -1;
             }
         }
 

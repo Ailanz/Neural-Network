@@ -24,7 +24,7 @@ namespace NeuralNetwork.neuron
         public double BIAS = 1.0;
         public double BIAS_WEIGHT = 0.5;
 
-        public ActivationFunction activationFunction = new Sigmoid();
+        public ActivationFunction activationFunction = Sigmoid.GetInstance();
 
         String ERROR_LENGTH_MISMATCH = "Weight length does not match input length, {0} and {1}";
 
@@ -64,7 +64,7 @@ namespace NeuralNetwork.neuron
                 previousChangeDelta = new double[length];
                 for (int i = 0; i < length; i++)
                 {
-                    weights[i] = rand.Next(0, 100) / 100.0;
+                    weights[i] = 0;// rand.Next(0, 100) / 100.0;
                     previousChangeDelta[i] = 0;
                 }
             }
