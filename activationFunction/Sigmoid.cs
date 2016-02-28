@@ -10,6 +10,8 @@ namespace NeuralNetwork.activationFunction
     {
         double stretch = 1;
 
+        public Sigmoid() { }
+
         public Sigmoid(double scale)
         {
             this.stretch = scale;

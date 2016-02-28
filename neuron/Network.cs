@@ -1,18 +1,21 @@
 ﻿using NeuralNetwork.activationFunction;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace NeuralNetwork.neuron
 {
+    [Serializable()]
     public class Network
     {
-        Neuron[] inputLayerNeurons;
-        Neuron[] hiddenLayerNeurons;
-        Neuron[] secondHiddenLayerNeurons;
-        Neuron[] outputLayerNeurons;
+        public Neuron[] inputLayerNeurons;
+        public Neuron[] hiddenLayerNeurons;
+        public Neuron[] secondHiddenLayerNeurons;
+        public Neuron[] outputLayerNeurons;
 
         public Network() { }
 
@@ -142,6 +145,26 @@ namespace NeuralNetwork.neuron
         public Neuron[] GetInputNeurons()
         {
             return inputLayerNeurons;
+        }
+
+        public void SerializeNetworkToFile(string filepath)
+        {
+            XmlSerializer SerializerObj = new XmlSerializer(typeof(Network), new Type[] { typeof(Neuron), typeof(Sigmoid), typeof(Tanh) });
+            // Create a new file stream to write the serialized object to a file
+            TextWriter WriteFileStream = new StreamWriter(filepath);
+            SerializerObj.Serialize(WriteFileStream, this);
+            // Cleanup
+            WriteFileStream.Close();
+        }
+
+        public static Network DeserializeNetworkFromFile(string filepath)
+        {
+            FileStream ReadFileStream = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            XmlSerializer SerializerObj = new XmlSerializer(typeof(Network), new Type[] { typeof(Neuron), typeof(Sigmoid), typeof(Tanh) });
+            Network LoadedObj = (Network)SerializerObj.Deserialize(ReadFileStream); 
+            // Cleanup
+            ReadFileStream.Close();
+            return LoadedObj;
         }
 
     }

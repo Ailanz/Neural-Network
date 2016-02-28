@@ -8,6 +8,7 @@ namespace NeuralNetwork.activationFunction
 {
     public class Tanh : ActivationFunction
     {
+        public Tanh() { }
         public override double GetResult(double value)
         {
             return Math.Tanh(value);

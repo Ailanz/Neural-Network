@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace NeuralNetwork.neuron
 {
+    [Serializable()]
     public class Neuron
     {
         static Random rand = new Random();
@@ -16,9 +18,11 @@ namespace NeuralNetwork.neuron
         public double[] previousChangeDelta { get; set; }
         public double[] doubleInputs { get; set; }
 
+        [XmlIgnore]
         public double backPropogationError { get; set; }
         public Neuron[] neuronInputs { get; set; }
 
+        [XmlIgnore]
         public double cachedOutput = 0;
 
         public double BIAS = 1.0;
@@ -28,6 +32,9 @@ namespace NeuralNetwork.neuron
 
         String ERROR_LENGTH_MISMATCH = "Weight length does not match input length, {0} and {1}";
 
+        public Neuron()
+        { 
+        }
         public Neuron(ActivationFunction activationFunction) 
         {
             this.activationFunction = activationFunction;

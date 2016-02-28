@@ -51,7 +51,9 @@
     <Compile Include="normalizer\Normalizer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="teach\ThreadPoolTrainer.cs" />
     <Compile Include="teach\Trainer.cs" />
+    <Compile Include="teach\TrainWorker.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
