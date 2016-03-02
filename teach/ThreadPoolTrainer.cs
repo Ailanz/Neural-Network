@@ -1,4 +1,7 @@
-﻿using NeuralNetwork.neuron;
+﻿using Cudafy;
+using Cudafy.Host;
+using Cudafy.Translator;
+using NeuralNetwork.neuron;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,25 +14,22 @@ namespace NeuralNetwork.teach
     class ThreadPoolTrainer
     {
         Network network;
-        double learnRate = 0.30;
-        double momentum = 0.1;
+        const double learnRate = 0.30;
+        const double momentum = 0.1;
         static Random random = new Random();
         const int RANDOM_SAMPLE = 35;
         public static int counter = 0;
 
         public delegate void Callback(Network network, List<double[]> inputs, List<double[]> targets, double errorRate, double learnRate, double momentum, int repetition);
 
+
         public ThreadPoolTrainer(Network network)
         {
             this.network = network;
         }
-        public double Train(List<double[]> inputs, List<double[]> targets, double precision)
-        {
-            return Train(inputs, targets, precision, null);
-        }
 
         public double Train(List<double[]> inputs, List<double[]> targets, double precision, Callback callback)
-        {
+        {  
             double sumError = Double.MaxValue;
             int repetition = 0;
             while (sumError > precision)
@@ -111,7 +111,7 @@ namespace NeuralNetwork.teach
             TrainWorker.doneEvent = _doneEvent; 
             counter = neurons.Length;
             for (int i = 0; i < neurons.Length; i++)
-            {   
+            {
                 workers[i] = new TrainWorker(neurons[i], neurons[i].backPropogationError);
                 ThreadPool.QueueUserWorkItem(workers[i].ThreadPoolCallback, i);
             }

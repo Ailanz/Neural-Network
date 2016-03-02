@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Cudafy;
 
 namespace NeuralNetwork.teach
 {
@@ -44,28 +45,40 @@ namespace NeuralNetwork.teach
 
         }
 
+        [Cudafy]
         public void Work(Neuron neuron)
         {
             double output = neuron.GetOutput(); //0.14
             double error = neuron.activationFunction.GetSquashFunction(output) * this.error;
             neuron.backPropogationError = 0;
             double[] inputs = neuron.GetInputs(); //0.15
+            List<KeyValuePair<Neuron, double>> backPropErrorList = new List<KeyValuePair<Neuron, double>>();
+                
 
             for (int j = 0; j < neuron.weights.Length; j++)
             {
-                //lock (_object)
-                {
-                    double changeDelta = (error * inputs[j]) * learnRate + neuron.previousChangeDelta[j] * momentum;
-                    //Modify each weight
-                    if (!neuron.isInputLayer())
+
+                double changeDelta = (error * inputs[j]) * learnRate + neuron.previousChangeDelta[j] * momentum;
+                //Modify each weight
+                if (!neuron.isInputLayer())
+                {                
+                    double backPropError = error * neuron.weights[j];
+                    lock (neuron.neuronInputs[j])
                     {
-                        neuron.neuronInputs[j].backPropogationError += error * neuron.weights[j];
+                        neuron.neuronInputs[j].backPropogationError += backPropError;
                     }
-                    neuron.weights[j] += changeDelta;
-                    neuron.previousChangeDelta[j] = changeDelta;
-                    //Propogate the error back to previous layer neuron
                 }
+                neuron.weights[j] += changeDelta;
+                neuron.previousChangeDelta[j] = changeDelta;
+                //Propogate the error back to previous layer neuron
+
             }
+            /*
+            foreach (KeyValuePair<Neuron, double> kv in backPropErrorList)
+            {
+                kv.Key.backPropogationError 
+            }
+             * */
             //Modify Bias
             ModifyBias(neuron, error);
         }
