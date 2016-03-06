@@ -1,7 +1,4 @@
-﻿using Cudafy;
-using Cudafy.Host;
-using Cudafy.Translator;
-using NeuralNetwork.neuron;
+﻿using NeuralNetwork.neuron;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,13 +11,11 @@ namespace NeuralNetwork.teach
     class ThreadPoolTrainer
     {
         Network network;
-        const double learnRate = 0.30;
-        const double momentum = 0.1;
         static Random random = new Random();
         const int RANDOM_SAMPLE = 35;
         public static int counter = 0;
 
-        public delegate void Callback(Network network, List<double[]> inputs, List<double[]> targets, double errorRate, double learnRate, double momentum, int repetition);
+        public delegate void Callback(Network network, List<double[]> inputs, List<double[]> targets, double errorRate, int repetition);
 
 
         public ThreadPoolTrainer(Network network)
@@ -44,12 +39,12 @@ namespace NeuralNetwork.teach
 
                 if (callback != null)
                 {
-                    callback(this.network, inputs, targets, sumError, learnRate, momentum, repetition);
+                    callback(this.network, inputs, targets, sumError, repetition);
                 }
 
                 repetition++;
             }
-            Console.WriteLine("Stopped at: " + repetition + " with error: " + sumError + ", Learn Rate: " + learnRate);
+            Console.WriteLine("Stopped at: " + repetition + " with error: " + sumError );
             return sumError;
         }
 
@@ -89,17 +84,11 @@ namespace NeuralNetwork.teach
 
             for (int i = 0; i < neuronsToTrain.Length; i++)
             {
-                //doneEvents[i] = new ManualResetEvent(false);
                 workers[i] = new TrainWorker(neuronsToTrain[i], targets[i] - neuronsToTrain[i].GetOutput());
                 ThreadPool.QueueUserWorkItem(workers[i].ThreadPoolCallback, i);
             }
 
             _doneEvent.WaitOne();
-            //Thread.Sleep(1000);
-            //Console.WriteLine("Waiting for threads");
-
-            //WaitHandle.WaitAll(doneEvents);
-           // Console.WriteLine(neuronsToTrain.Length + " * " + neuronsToTrain[0].weights.Length + " = " + stepCount);
         }
 
         public void TrainLayerNeurons(Neuron[] neurons)
@@ -116,18 +105,8 @@ namespace NeuralNetwork.teach
                 ThreadPool.QueueUserWorkItem(workers[i].ThreadPoolCallback, i);
             }
             _doneEvent.WaitOne();
-
-            //Thread.Sleep(1000);
-
-            //Console.WriteLine("Waiting for threads");
-            //WaitHandle.WaitAll(doneEvents);
-            //Console.WriteLine(neurons.Length + " * " + neurons[0].weights.Length + " = " + stepCount);
         }
 
-        public void ModifyBias(Neuron neuron, double error)
-        {
-            neuron.BIAS_WEIGHT += error * learnRate;
-        }
 
         public double EstimateErrorRate(double[] inputs, double[] targets)
         {

@@ -20,7 +20,7 @@ namespace NeuralNetwork.teach
         static Random random = new Random();
         const int RANDOM_SAMPLE = 35;
 
-        public delegate void Callback(Network network, List<double[]> inputs, List<double[]> targets, double errorRate, double learnRate, double momentum, int repetition);
+        public delegate void Callback(Network network, List<double[]> inputs, List<double[]> targets, double errorRate, int repetition);
 
         public Trainer(Network network)
         {
@@ -47,7 +47,7 @@ namespace NeuralNetwork.teach
 
                 if (callback != null)
                 {
-                    callback(this.network, inputs, targets, sumError, learnRate, momentum, repetition);
+                    callback(this.network, inputs, targets, sumError,repetition);
                 }
 
                 repetition++;

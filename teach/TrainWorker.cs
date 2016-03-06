@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Cudafy;
 
 namespace NeuralNetwork.teach
 {
@@ -13,8 +12,8 @@ namespace NeuralNetwork.teach
     {
         private Neuron neuron;
 
-        double learnRate = 0.30;
-        double momentum = 0.1;
+        const double learnRate = 0.25;
+        const double momentum = 0.1;
         double error = 0;
         static Random random = new Random();
         const int RANDOM_SAMPLE = 35;
@@ -34,10 +33,7 @@ namespace NeuralNetwork.teach
 
         public void ThreadPoolCallback(Object threadContext)
         {
-            int threadIndex = (int)threadContext;
-
             Work(neuron);
-
             if (Interlocked.Decrement(ref counter) == 0)
             {
                 doneEvent.Set();
@@ -45,42 +41,35 @@ namespace NeuralNetwork.teach
 
         }
 
-        [Cudafy]
         public void Work(Neuron neuron)
         {
-            double output = neuron.GetOutput(); //0.14
-            double error = neuron.activationFunction.GetSquashFunction(output) * this.error;
-            neuron.backPropogationError = 0;
-            double[] inputs = neuron.GetInputs(); //0.15
-            List<KeyValuePair<Neuron, double>> backPropErrorList = new List<KeyValuePair<Neuron, double>>();
-                
-
-            for (int j = 0; j < neuron.weights.Length; j++)
+            lock (neuron)
             {
+                double output = neuron.GetOutput(); //0.14
+                double error = neuron.activationFunction.GetSquashFunction(output) * this.error;
+                neuron.backPropogationError = 0;
+                double[] inputs = neuron.GetInputs(); //0.15
+                List<KeyValuePair<Neuron, double>> backPropErrorList = new List<KeyValuePair<Neuron, double>>();
 
-                double changeDelta = (error * inputs[j]) * learnRate + neuron.previousChangeDelta[j] * momentum;
-                //Modify each weight
-                if (!neuron.isInputLayer())
-                {                
-                    double backPropError = error * neuron.weights[j];
-                    lock (neuron.neuronInputs[j])
+                for (int j = 0; j < neuron.weights.Length; j++)
+                {
+
+                    double changeDelta = (error * inputs[j]) * learnRate + neuron.previousChangeDelta[j] * momentum;
+                    //Modify each weight
+                    if (!neuron.isInputLayer())
                     {
-                        neuron.neuronInputs[j].backPropogationError += backPropError;
-                    }
-                }
-                neuron.weights[j] += changeDelta;
-                neuron.previousChangeDelta[j] = changeDelta;
-                //Propogate the error back to previous layer neuron
+                        double backPropError = error * neuron.weights[j];
 
+                        neuron.neuronInputs[j].backPropogationError += backPropError;
+
+                    }
+                    neuron.weights[j] += changeDelta;
+                    neuron.previousChangeDelta[j] = changeDelta;
+                    //Propogate the error back to previous layer neuron
+                }
+                //Modify Bias
+                ModifyBias(neuron, error);
             }
-            /*
-            foreach (KeyValuePair<Neuron, double> kv in backPropErrorList)
-            {
-                kv.Key.backPropogationError 
-            }
-             * */
-            //Modify Bias
-            ModifyBias(neuron, error);
         }
 
         public void ModifyBias(Neuron neuron, double error)

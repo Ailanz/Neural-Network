@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -63,6 +65,8 @@ namespace NeuralNetwork.neuron
                 }
             }
             Console.WriteLine("Total number of neurons: " + (inputLayerNeurons.Length + hiddenLayerNeurons.Length + secondHiddenLayerNeurons.Length + outputLayerNeurons.Length));
+            Console.WriteLine("Number of connections {0} * {1} * {2} * {3}: " + (double)(inputLayerNeurons.Length * hiddenLayerNeurons.Length * secondHiddenLayerNeurons.Length * outputLayerNeurons.Length)
+                , inputLayerNeurons.Length, hiddenLayerNeurons.Length , secondHiddenLayerNeurons.Length, outputLayerNeurons.Length);
         }
 
 
@@ -123,7 +127,7 @@ namespace NeuralNetwork.neuron
 
         public double[] GetOutputsAsDoubleArray()
         {
-            ResetAllCachedOutput();
+            //ResetAllCachedOutput();
             double[] outputs = new double[outputLayerNeurons.Length];
             for(int i=0; i < outputLayerNeurons.Length; i++)
             {
@@ -149,22 +153,53 @@ namespace NeuralNetwork.neuron
 
         public void SerializeNetworkToFile(string filepath)
         {
-            XmlSerializer SerializerObj = new XmlSerializer(typeof(Network), new Type[] { typeof(Neuron), typeof(Sigmoid), typeof(Tanh) });
-            // Create a new file stream to write the serialized object to a file
-            TextWriter WriteFileStream = new StreamWriter(filepath);
-            SerializerObj.Serialize(WriteFileStream, this);
-            // Cleanup
-            WriteFileStream.Close();
+            //XmlSerializer SerializerObj = new XmlSerializer(typeof(Network), new Type[] { typeof(Neuron), typeof(Sigmoid), typeof(Tanh) });
+            //// Create a new file stream to write the serialized object to a file
+            //TextWriter WriteFileStream = new StreamWriter(filepath);
+            //SerializerObj.Serialize(WriteFileStream, this);
+            //// Cleanup
+            //WriteFileStream.Close();
+            FileStream fs = new FileStream(filepath, FileMode.Create);
+
+            // Construct a BinaryFormatter and use it to serialize the data to the stream.
+            BinaryFormatter formatter = new BinaryFormatter();
+            try
+            {
+                formatter.Serialize(fs, this);
+            }
+            catch (SerializationException e)
+            {
+                Console.WriteLine("Failed to serialize. Reason: " + e.Message);
+                throw;
+            }
+            finally
+            {
+                fs.Close();
+            }
         }
 
         public static Network DeserializeNetworkFromFile(string filepath)
         {
-            FileStream ReadFileStream = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            XmlSerializer SerializerObj = new XmlSerializer(typeof(Network), new Type[] { typeof(Neuron), typeof(Sigmoid), typeof(Tanh) });
-            Network LoadedObj = (Network)SerializerObj.Deserialize(ReadFileStream); 
-            // Cleanup
-            ReadFileStream.Close();
-            return LoadedObj;
+            Network network = null;
+            FileStream fs = new FileStream(filepath, FileMode.Open);
+            try
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+
+                // Deserialize the hashtable from the file and 
+                // assign the reference to the local variable.
+                network  = (Network)formatter.Deserialize(fs);
+            }
+            catch (SerializationException e)
+            {
+                Console.WriteLine("Failed to deserialize. Reason: " + e.Message);
+                throw;
+            }
+            finally
+            {
+                fs.Close();
+            }
+            return network;
         }
 
     }

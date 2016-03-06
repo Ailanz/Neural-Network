@@ -23,8 +23,8 @@ namespace NeuralNetwork
             //TestBasicMath();
             //TestAdd();
             //ResizeImage();
-            TestImage(10);
-            //TestImageFromSavedObj();
+            TestImage(30);
+            TestImageFromSavedObj(25, @"D:\test.dat");
             //TestRecreateImage();
             double[] normalize = new double[] { 2, 5, 7, -1 };
             normalize = Normalizer.Normalize(normalize, -1, 7);
@@ -41,14 +41,14 @@ namespace NeuralNetwork
             Console.Read();
         }
 
-        public static void CallbackMethod(Network network, List<double[]> inputs, List<double[]> targets, double errorRate, double learnRate, double momentum, int repetition)
+        public static void CallbackMethod(Network network, List<double[]> inputs, List<double[]> targets, double errorRate, int repetition)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             if (repetition % 5 == 0)
             {
                 //CREATE IMAGE
                 network.SetInputs(inputs[0]);
-                int width = 10;
+                int width = 30;
                 double[] xyz = network.GetOutputsAsDoubleArray();
                 double[] outputs1 = Normalizer.Denormalize(network.GetOutputsAsDoubleArray(), 0, 255);
                 Bitmap createdImage = ImageHelper.DoubleArrayToBitmap(outputs1, width, width);
@@ -60,8 +60,7 @@ namespace NeuralNetwork
                 createdImage = ImageHelper.DoubleArrayToBitmap(outputs2, width, width);
                 createdImage.Save("C:\\Users\\Ailan\\Pictures\\test\\TEST-" + repetition + ".png");
 
-                Console.WriteLine("Error Rate: " + Math.Round(errorRate, 5) + ", Learn Rate: "
-                + Math.Round(learnRate, 5) + " Momentum: " + Math.Round(momentum, 5));
+                Console.WriteLine("Error Rate: " + Math.Round(errorRate, 5));
                     //Console.WriteLine("Error Rate: " + errorRate);
 
                 stopwatch.Stop();
@@ -70,37 +69,33 @@ namespace NeuralNetwork
             }
         }
 
-        static void TestImageFromSavedObj(int width)
+        static void TestImageFromSavedObj(int width, string filepath)
         {
             int height = width;
+            Network network = Network.DeserializeNetworkFromFile(filepath);
 
             Image img1 = new Bitmap("C:\\Users\\Ailan\\Pictures\\folderImg.png");
             Image img2 = new Bitmap("C:\\Users\\Ailan\\Pictures\\folderImg2.png");
             Image img3 = new Bitmap("C:\\Users\\Ailan\\Pictures\\folderImg3.png");
 
-            Bitmap resized3R = ImageHelper.ResizeImage(img3, width, height);
-
             double[] imgArray1 = ImageHelper.ImageToDoubleArray(ImageHelper.ResizeImage(img1, width, height));
             double[] imgArray2 = ImageHelper.ImageToDoubleArray(ImageHelper.ResizeImage(img2, width, height));
             double[] imgArray3 = ImageHelper.ImageToDoubleArray(ImageHelper.ResizeImage(img3, width, height));
 
-            Network network = Network.DeserializeNetworkFromFile(@"C:\test.xml");
-
             network.SetInputs(Normalizer.Normalize(imgArray1, 0, 256));
             double[] outputs = Normalizer.Denormalize(network.GetOutputsAsDoubleArray(), 0, 255);
             Bitmap createdImage = ImageHelper.DoubleArrayToBitmap(outputs, width, height);
-            createdImage.Save("C:\\Users\\Ailan\\Pictures\\folderImgCREATED.png");
+            createdImage.Save("C:\\Users\\Ailan\\Pictures\\test\\FinalImageFromSavedObj.png");
 
             network.SetInputs(Normalizer.Normalize(imgArray2, 0, 256));
             double[] outputs2 = Normalizer.Denormalize(network.GetOutputsAsDoubleArray(), 0, 255);
             createdImage = ImageHelper.DoubleArrayToBitmap(outputs2, width, height);
-            createdImage.Save("C:\\Users\\Ailan\\Pictures\\folderImgCREATED2.png");
+            createdImage.Save("C:\\Users\\Ailan\\Pictures\\test\\FinalImageFromSavedObj2.png");
 
             network.SetInputs(Normalizer.Normalize(imgArray3, 0, 256));
             double[] outputs3 = Normalizer.Denormalize(network.GetOutputsAsDoubleArray(), 0, 255);
             createdImage = ImageHelper.DoubleArrayToBitmap(outputs3, width, height);
-            createdImage.Save("C:\\Users\\Ailan\\Pictures\\folderImgCREATED3.png");
-            Console.WriteLine("Equal: " + isEqual(outputs, outputs2) + ", " + isEqual(imgArray1, imgArray2));
+            createdImage.Save("C:\\Users\\Ailan\\Pictures\\test\\FinalImageFromSavedObj3.png");
 
         }
 
@@ -123,11 +118,14 @@ namespace NeuralNetwork
 
             int inputSize = imgArray1.Length;
 
-            Network network = new Network(inputSize, 2 * inputSize / 3, inputSize , width * height * 3, Sigmoid.GetInstance(1));
+            Network network = new Network(inputSize, inputSize / 3, inputSize / 3, width * height * 3, Sigmoid.GetInstance(1));
+            //Network network = new Network(inputSize, 80, 80, width * height * 3, Sigmoid.GetInstance(1));
+
             Neuron output1 = network.GetOutputNeurons()[0];
             Console.WriteLine("Output: " + output1.GetOutput());
-            //Trainer trainer = new Trainer(network);
-            ThreadPoolTrainer trainer = new ThreadPoolTrainer(network);
+
+            Trainer trainer = new Trainer(network);
+            //ThreadPoolTrainer trainer = new ThreadPoolTrainer(network);
 
             // Console.WriteLine("Before Training: " + output1.GetOutput());
 
@@ -143,8 +141,8 @@ namespace NeuralNetwork
             outputTrainingList.Add(Normalizer.Normalize(imgArray3, 0, 255));
 
 
-            //NeuralNetwork.teach.Trainer.Callback handler = CallbackMethod;
-            NeuralNetwork.teach.ThreadPoolTrainer.Callback handler = CallbackMethod;
+            NeuralNetwork.teach.Trainer.Callback handler = CallbackMethod;
+            //NeuralNetwork.teach.ThreadPoolTrainer.Callback handler = CallbackMethod;
 
             trainer.Train(inputTrainingList, outputTrainingList, 0.10, handler);
 
@@ -165,7 +163,7 @@ namespace NeuralNetwork
             createdImage.Save("C:\\Users\\Ailan\\Pictures\\folderImgCREATED3.png");
             Console.WriteLine("Equal: " + isEqual(outputs, outputs2) + ", " + isEqual(imgArray1, imgArray2));
 
-            network.SerializeNetworkToFile(@"D:\test.xml");
+            network.SerializeNetworkToFile(@"D:\test.dat");
         }
 
         public static bool isEqual(double[] a, double[] b)

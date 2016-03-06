@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace NeuralNetwork.activationFunction
 {
+    [Serializable()] 
     public class Tanh : ActivationFunction
     {
         public Tanh() { }

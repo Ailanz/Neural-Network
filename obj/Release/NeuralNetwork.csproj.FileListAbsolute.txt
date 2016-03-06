@@ -1,0 +1,6 @@
+C:\inetpub\wwwroot\Tree\NeuralNetwork\bin\Release\NeuralNetwork.pdb
+C:\inetpub\wwwroot\Tree\NeuralNetwork\obj\Release\NeuralNetwork.pdb
+C:\inetpub\wwwroot\Tree\NeuralNetwork\obj\Release\NeuralNetwork.csprojResolveAssemblyReference.cache
+C:\inetpub\wwwroot\Tree\NeuralNetwork\bin\Release\NeuralNetwork.dll.config
+C:\inetpub\wwwroot\Tree\NeuralNetwork\bin\Release\NeuralNetwork.dll
+C:\inetpub\wwwroot\Tree\NeuralNetwork\obj\Release\NeuralNetwork.dll

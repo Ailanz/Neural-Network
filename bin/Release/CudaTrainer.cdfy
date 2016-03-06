@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CudafyModule Version="1.29.5576.13786" Name="CudaTrainer" DebugInfo="false" HasCudaSourceCode="false" HasPTX="true" HasBinary="false">
+  <CudaSourceCode></CudaSourceCode>
+  <PTXMODULES>
+    <PTXMODULE Platform="x86" Arch="sm_20" SourceCodeFile="684628c7-47e7-40c8-82ab-2c20cee0327e">Ly8NCi8vIEdlbmVyYXRlZCBieSBOVklESUEgTlZWTSBDb21waWxlcg0KLy8NCi8vIENvbXBpbGVyIEJ1aWxkIElEOiBDTC0xOTgwNTQ3NA0KLy8gQ3VkYSBjb21waWxhdGlvbiB0b29scywgcmVsZWFzZSA3LjUsIFY3LjUuMTYNCi8vIEJhc2VkIG9uIExMVk0gMy40c3ZuDQovLw0KDQoudmVyc2lvbiA0LjMNCi50YXJnZXQgc21fMjANCi5hZGRyZXNzX3NpemUgMzINCg0KCS8vIC5nbG9ibAlDYWxjdWxhdGVDaGFuZ2VEZWx0YQ0KDQoudmlzaWJsZSAuZW50cnkgQ2FsY3VsYXRlQ2hhbmdlRGVsdGEoDQoJLnBhcmFtIC5mNjQgQ2FsY3VsYXRlQ2hhbmdlRGVsdGFfcGFyYW1fMCwNCgkucGFyYW0gLmY2NCBDYWxjdWxhdGVDaGFuZ2VEZWx0YV9wYXJhbV8xLA0KCS5wYXJhbSAuZjY0IENhbGN1bGF0ZUNoYW5nZURlbHRhX3BhcmFtXzIsDQoJLnBhcmFtIC5mNjQgQ2FsY3VsYXRlQ2hhbmdlRGVsdGFfcGFyYW1fMywNCgkucGFyYW0gLmY2NCBDYWxjdWxhdGVDaGFuZ2VEZWx0YV9wYXJhbV80LA0KCS5wYXJhbSAudTMyIENhbGN1bGF0ZUNoYW5nZURlbHRhX3BhcmFtXzUsDQoJLnBhcmFtIC51MzIgQ2FsY3VsYXRlQ2hhbmdlRGVsdGFfcGFyYW1fNg0KKQ0Kew0KCS5yZWcgLmIzMiAJJXI8Mz47DQoJLnJlZyAuZjY0IAklZmQ8OT47DQoNCg0KCWxkLnBhcmFtLmY2NCAJJWZkMSwgW0NhbGN1bGF0ZUNoYW5nZURlbHRhX3BhcmFtXzBdOw0KCWxkLnBhcmFtLmY2NCAJJWZkMiwgW0NhbGN1bGF0ZUNoYW5nZURlbHRhX3BhcmFtXzFdOw0KCWxkLnBhcmFtLmY2NCAJJWZkMywgW0NhbGN1bGF0ZUNoYW5nZURlbHRhX3BhcmFtXzJdOw0KCWxkLnBhcmFtLmY2NCAJJWZkNCwgW0NhbGN1bGF0ZUNoYW5nZURlbHRhX3BhcmFtXzNdOw0KCWxkLnBhcmFtLmY2NCAJJWZkNSwgW0NhbGN1bGF0ZUNoYW5nZURlbHRhX3BhcmFtXzRdOw0KCWxkLnBhcmFtLnUzMiAJJXIxLCBbQ2FsY3VsYXRlQ2hhbmdlRGVsdGFfcGFyYW1fNV07DQoJY3Z0YS50by5nbG9iYWwudTMyIAklcjIsICVyMTsNCgltdWwuZjY0IAklZmQ2LCAlZmQxLCAlZmQyOw0KCW11bC5mNjQgCSVmZDcsICVmZDQsICVmZDU7DQoJZm1hLnJuLmY2NCAJJWZkOCwgJWZkNiwgJWZkMywgJWZkNzsNCglzdC5nbG9iYWwuZjY0IAlbJXIyXSwgJWZkODsNCglyZXQ7DQp9DQoNCgkvLyAuZ2xvYmwJTXVsdGlwbHkNCi52aXNpYmxlIC5lbnRyeSBNdWx0aXBseSgNCgkucGFyYW0gLmY2NCBNdWx0aXBseV9wYXJhbV8wLA0KCS5wYXJhbSAuZjY0IE11bHRpcGx5X3BhcmFtXzEsDQoJLnBhcmFtIC51MzIgTXVsdGlwbHlfcGFyYW1fMiwNCgkucGFyYW0gLnUzMiBNdWx0aXBseV9wYXJhbV8zDQopDQp7DQoJLnJlZyAuYjMyIAklcjwzPjsNCgkucmVnIC5mNjQgCSVmZDw0PjsNCg0KDQoJbGQucGFyYW0uZjY0IAklZmQxLCBbTXVsdGlwbHlfcGFyYW1fMF07DQoJbGQucGFyYW0uZjY0IAklZmQyLCBbTXVsdGlwbHlfcGFyYW1fMV07DQoJbGQucGFyYW0udTMyIAklcjEsIFtNdWx0aXBseV9wYXJhbV8yXTsNCgljdnRhLnRvLmdsb2JhbC51MzIgCSVyMiwgJXIxOw0KCW11bC5mNjQgCSVmZDMsICVmZDEsICVmZDI7DQoJc3QuZ2xvYmFsLmY2NCAJWyVyMl0sICVmZDM7DQoJcmV0Ow0KfQ0KDQoNCg==</PTXMODULE>
+  </PTXMODULES>
+  <BinaryModules />
+  <SourceCodes>
+    <SourceCodeFile ID="684628c7-47e7-40c8-82ab-2c20cee0327e" Language="Cuda" Arch="sm_20">DQovLyBOZXVyYWxOZXR3b3JrLnRlYWNoLkN1ZGFUcmFpbmVyDQpleHRlcm4gIkMiIF9fZ2xvYmFsX18gIHZvaWQgQ2FsY3VsYXRlQ2hhbmdlRGVsdGEoZG91YmxlIGVycm9yLCBkb3VibGUgaW5wdXQsIGRvdWJsZSBsZWFyblJhdGUsIGRvdWJsZSBwcmV2aW91c0NoYW5nZURlbHRhLCBkb3VibGUgbW9tZW50dW0sICBkb3VibGUqIGMsIGludCBjTGVuMCk7DQovLyBOZXVyYWxOZXR3b3JrLnRlYWNoLkN1ZGFUcmFpbmVyDQpleHRlcm4gIkMiIF9fZ2xvYmFsX18gIHZvaWQgTXVsdGlwbHkoZG91YmxlIGEsIGRvdWJsZSBiLCAgZG91YmxlKiBjLCBpbnQgY0xlbjApOw0KDQovLyBOZXVyYWxOZXR3b3JrLnRlYWNoLkN1ZGFUcmFpbmVyDQpleHRlcm4gIkMiIF9fZ2xvYmFsX18gIHZvaWQgQ2FsY3VsYXRlQ2hhbmdlRGVsdGEoZG91YmxlIGVycm9yLCBkb3VibGUgaW5wdXQsIGRvdWJsZSBsZWFyblJhdGUsIGRvdWJsZSBwcmV2aW91c0NoYW5nZURlbHRhLCBkb3VibGUgbW9tZW50dW0sICBkb3VibGUqIGMsIGludCBjTGVuMCkNCnsNCgljWygwKV0gPSBlcnJvciAqIGlucHV0ICogbGVhcm5SYXRlICsgcHJldmlvdXNDaGFuZ2VEZWx0YSAqIG1vbWVudHVtOw0KfQ0KLy8gTmV1cmFsTmV0d29yay50ZWFjaC5DdWRhVHJhaW5lcg0KZXh0ZXJuICJDIiBfX2dsb2JhbF9fICB2b2lkIE11bHRpcGx5KGRvdWJsZSBhLCBkb3VibGUgYiwgIGRvdWJsZSogYywgaW50IGNMZW4wKQ0Kew0KCWNbKDApXSA9IGEgKiBiOw0KfQ0K</SourceCodeFile>
+  </SourceCodes>
+  <Functions>
+    <CudafyKernelMethod Name="CalculateChangeDelta" Type="Global" IsDummy="false" DummyBehaviour="Default">
+      <Type>NeuralNetwork.teach.CudaTrainer</Type>
+      <Assembly>NeuralNetwork, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</Assembly>
+      <AssemblyName>NeuralNetwork</AssemblyName>
+      <AssemblyPath>C:\inetpub\wwwroot\Tree\NeuralNetwork\bin\Release\NeuralNetwork.exe</AssemblyPath>
+      <Checksum>517309820</Checksum>
+      <Parameters>
+        <ReturnType>System.Void</ReturnType>
+        <Parameter Type="System.Double" Name="error" Position="0" />
+        <Parameter Type="System.Double" Name="input" Position="1" />
+        <Parameter Type="System.Double" Name="learnRate" Position="2" />
+        <Parameter Type="System.Double" Name="previousChangeDelta" Position="3" />
+        <Parameter Type="System.Double" Name="momentum" Position="4" />
+        <Parameter Type="System.Double[]" Name="c" Position="5" />
+      </Parameters>
+    </CudafyKernelMethod>
+    <CudafyKernelMethod Name="Multiply" Type="Global" IsDummy="false" DummyBehaviour="Default">
+      <Type>NeuralNetwork.teach.CudaTrainer</Type>
+      <Assembly>NeuralNetwork, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</Assembly>
+      <AssemblyName>NeuralNetwork</AssemblyName>
+      <AssemblyPath>C:\inetpub\wwwroot\Tree\NeuralNetwork\bin\Release\NeuralNetwork.exe</AssemblyPath>
+      <Checksum>517309820</Checksum>
+      <Parameters>
+        <ReturnType>System.Void</ReturnType>
+        <Parameter Type="System.Double" Name="a" Position="0" />
+        <Parameter Type="System.Double" Name="b" Position="1" />
+        <Parameter Type="System.Double[]" Name="c" Position="2" />
+      </Parameters>
+    </CudafyKernelMethod>
+  </Functions>
+  <Constants />
+  <Types />
+</CudafyModule>

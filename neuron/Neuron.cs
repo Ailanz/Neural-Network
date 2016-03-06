@@ -151,11 +151,7 @@ namespace NeuralNetwork.neuron
   
         public bool isInputLayer()
         {
-            if (this.doubleInputs == null || this.doubleInputs.Length == 0)
-            {
-                return false;
-            }
-            return true;
+            return (this.doubleInputs == null || this.doubleInputs.Length == 0) ? false : true;
         }
     }
 }

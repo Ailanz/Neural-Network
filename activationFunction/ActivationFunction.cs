@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace NeuralNetwork.activationFunction
 {
+    [Serializable()] 
     public abstract class ActivationFunction
     {
         public abstract double GetResult(double value);
