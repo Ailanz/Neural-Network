@@ -114,12 +114,12 @@ namespace NeuralNetwork
 
             int inputSize = imgArray1.Length;
 
-            Network network = new Network(Sigmoid.GetInstance());
-            network.numInputNeurons = inputSize;
-            network.numOutputNeurons = width * height * 3;
-            network.SetNumberOfHiddenNeurons(20, 20, 20);
-            network.ConstructNetwork();
-            //Network network = new Network(inputSize, inputSize / 3, inputSize / 3, width * height * 3, Sigmoid.GetInstance(1));
+            //Network network = new Network(Sigmoid.GetInstance());
+            //network.numInputNeurons = inputSize;
+            //network.numOutputNeurons = width * height * 3;
+            //network.SetNumberOfHiddenNeurons(80, 80);
+            //network.ConstructNetwork();
+            Network network = new Network(inputSize, inputSize / 3, inputSize / 3, width * height * 3, Sigmoid.GetInstance(1));
             //Network network = new Network(inputSize, 80, 80, width * height * 3, Sigmoid.GetInstance(1));
 
             Neuron output1 = network.GetOutputNeurons()[0];
