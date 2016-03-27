@@ -68,13 +68,9 @@ namespace NeuralNetwork.teach
 
             //Input and Output layer neurons are always non-null
             TrainOutputLayer(targets);
-            if (this.network.GetSecondHiddenLayerNeurons() != null || this.network.GetSecondHiddenLayerNeurons().Length != 0)
+            for (int i = this.network.hiddenLayerNeurons.Count - 1; i > 0; i--)
             {
-                TrainLayerNeurons(this.network.GetSecondHiddenLayerNeurons());
-            }
-            if (this.network.GetHiddenLayerNeurons() != null || this.network.GetHiddenLayerNeurons().Length != 0)
-            {
-                TrainLayerNeurons(this.network.GetHiddenLayerNeurons());
+                TrainLayerNeurons(this.network.hiddenLayerNeurons[i]);
             }
             TrainLayerNeurons(this.network.GetInputNeurons());
 

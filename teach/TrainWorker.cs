@@ -12,8 +12,8 @@ namespace NeuralNetwork.teach
     {
         private Neuron neuron;
 
-        const double learnRate = 0.25;
-        const double momentum = 0.1;
+        const double learnRate = 0.30;
+        const double momentum = 0.05;
         double error = 0;
         static Random random = new Random();
         const int RANDOM_SAMPLE = 35;
@@ -69,6 +69,7 @@ namespace NeuralNetwork.teach
                 }
                 //Modify Bias
                 ModifyBias(neuron, error);
+                neuron.hasUpdated = true;
             }
         }
 

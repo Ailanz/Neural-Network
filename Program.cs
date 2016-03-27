@@ -23,17 +23,13 @@ namespace NeuralNetwork
             //TestBasicMath();
             //TestAdd();
             //ResizeImage();
-            TestImage(30);
-            TestImageFromSavedObj(25, @"D:\test.dat");
+            TestImage(20);
+            TestImageFromSavedObj(20, @"D:\test.dat");
             //TestRecreateImage();
-            double[] normalize = new double[] { 2, 5, 7, -1 };
-            normalize = Normalizer.Normalize(normalize, -1, 7);
-            normalize = Normalizer.Denormalize(normalize, -1, 7);
+            //double[] normalize = new double[] { 2, 5, 7, -1 };
+            //normalize = Normalizer.Normalize(normalize, -1, 7);
+            //normalize = Normalizer.Denormalize(normalize, -1, 7);
             //Console.WriteLine(Sigmoid.GetInstance(5).GetResult(40));
-            foreach (double d in normalize)
-            {
-                //Console.WriteLine(d);
-            }
 
             // Create a new XmlSerializer instance with the type of the test class            
  
@@ -44,11 +40,11 @@ namespace NeuralNetwork
         public static void CallbackMethod(Network network, List<double[]> inputs, List<double[]> targets, double errorRate, int repetition)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            if (repetition % 5 == 0)
+            if (repetition % 25 == 0)
             {
                 //CREATE IMAGE
                 network.SetInputs(inputs[0]);
-                int width = 30;
+                int width = 20;
                 double[] xyz = network.GetOutputsAsDoubleArray();
                 double[] outputs1 = Normalizer.Denormalize(network.GetOutputsAsDoubleArray(), 0, 255);
                 Bitmap createdImage = ImageHelper.DoubleArrayToBitmap(outputs1, width, width);
@@ -82,7 +78,7 @@ namespace NeuralNetwork
             double[] imgArray2 = ImageHelper.ImageToDoubleArray(ImageHelper.ResizeImage(img2, width, height));
             double[] imgArray3 = ImageHelper.ImageToDoubleArray(ImageHelper.ResizeImage(img3, width, height));
 
-            network.SetInputs(Normalizer.Normalize(imgArray1, 0, 256));
+            network.SetInputs(Normalizer.Normalize(imgArray1, 0, 255));
             double[] outputs = Normalizer.Denormalize(network.GetOutputsAsDoubleArray(), 0, 255);
             Bitmap createdImage = ImageHelper.DoubleArrayToBitmap(outputs, width, height);
             createdImage.Save("C:\\Users\\Ailan\\Pictures\\test\\FinalImageFromSavedObj.png");
@@ -118,14 +114,19 @@ namespace NeuralNetwork
 
             int inputSize = imgArray1.Length;
 
-            Network network = new Network(inputSize, inputSize / 3, inputSize / 3, width * height * 3, Sigmoid.GetInstance(1));
+            Network network = new Network(Sigmoid.GetInstance());
+            network.numInputNeurons = inputSize;
+            network.numOutputNeurons = width * height * 3;
+            network.SetNumberOfHiddenNeurons(20, 20, 20);
+            network.ConstructNetwork();
+            //Network network = new Network(inputSize, inputSize / 3, inputSize / 3, width * height * 3, Sigmoid.GetInstance(1));
             //Network network = new Network(inputSize, 80, 80, width * height * 3, Sigmoid.GetInstance(1));
 
             Neuron output1 = network.GetOutputNeurons()[0];
             Console.WriteLine("Output: " + output1.GetOutput());
 
-            Trainer trainer = new Trainer(network);
-            //ThreadPoolTrainer trainer = new ThreadPoolTrainer(network);
+            //Trainer trainer = new Trainer(network);
+            ThreadPoolTrainer trainer = new ThreadPoolTrainer(network);
 
             // Console.WriteLine("Before Training: " + output1.GetOutput());
 
@@ -141,8 +142,8 @@ namespace NeuralNetwork
             outputTrainingList.Add(Normalizer.Normalize(imgArray3, 0, 255));
 
 
-            NeuralNetwork.teach.Trainer.Callback handler = CallbackMethod;
-            //NeuralNetwork.teach.ThreadPoolTrainer.Callback handler = CallbackMethod;
+            //NeuralNetwork.teach.Trainer.Callback handler = CallbackMethod;
+            NeuralNetwork.teach.ThreadPoolTrainer.Callback handler = CallbackMethod;
 
             trainer.Train(inputTrainingList, outputTrainingList, 0.10, handler);
 

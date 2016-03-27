@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NeuralNetwork.teach
 {
-    class ThreadPoolTrainer
+    public class ThreadPoolTrainer
     {
         Network network;
         static Random random = new Random();
@@ -24,7 +24,7 @@ namespace NeuralNetwork.teach
         }
 
         public double Train(List<double[]> inputs, List<double[]> targets, double precision, Callback callback)
-        {  
+        {
             double sumError = Double.MaxValue;
             int repetition = 0;
             while (sumError > precision)
@@ -44,7 +44,7 @@ namespace NeuralNetwork.teach
 
                 repetition++;
             }
-            Console.WriteLine("Stopped at: " + repetition + " with error: " + sumError );
+            Console.WriteLine("Stopped at: " + repetition + " with error: " + sumError);
             return sumError;
         }
 
@@ -60,17 +60,15 @@ namespace NeuralNetwork.teach
 
             //Input and Output layer neurons are always non-null
             TrainOutputLayer(targets);
-            if (this.network.GetSecondHiddenLayerNeurons() != null || this.network.GetSecondHiddenLayerNeurons().Length != 0)
+
+            for (int i = this.network.hiddenLayerNeurons.Count-1 ; i >= 0; i--)
             {
-                TrainLayerNeurons(this.network.GetSecondHiddenLayerNeurons());
+                TrainLayerNeurons(this.network.hiddenLayerNeurons[i]);
             }
-            if (this.network.GetHiddenLayerNeurons() != null || this.network.GetHiddenLayerNeurons().Length != 0)
-            {
-                TrainLayerNeurons(this.network.GetHiddenLayerNeurons());
-            }
+           
             TrainLayerNeurons(this.network.GetInputNeurons());
 
-            return EstimateErrorRate(inputs, targets);           
+            return EstimateErrorRate(inputs, targets);
         }
 
 
@@ -97,7 +95,7 @@ namespace NeuralNetwork.teach
             ManualResetEvent _doneEvent = new ManualResetEvent(false);
             TrainWorker[] workers = new TrainWorker[neurons.Length];
             TrainWorker.counter = neurons.Length;
-            TrainWorker.doneEvent = _doneEvent; 
+            TrainWorker.doneEvent = _doneEvent;
             counter = neurons.Length;
             for (int i = 0; i < neurons.Length; i++)
             {
