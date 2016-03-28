@@ -49,7 +49,6 @@ namespace NeuralNetwork.teach
                 double error = neuron.activationFunction.GetSquashFunction(output) * this.error;
                 neuron.backPropogationError = 0;
                 double[] inputs = neuron.GetInputs(); //0.15
-                List<KeyValuePair<Neuron, double>> backPropErrorList = new List<KeyValuePair<Neuron, double>>();
 
                 for (int j = 0; j < neuron.weights.Length; j++)
                 {
@@ -59,9 +58,7 @@ namespace NeuralNetwork.teach
                     if (!neuron.isInputLayer())
                     {
                         double backPropError = error * neuron.weights[j];
-
                         neuron.neuronInputs[j].backPropogationError += backPropError;
-
                     }
                     neuron.weights[j] += changeDelta;
                     neuron.previousChangeDelta[j] = changeDelta;

@@ -66,15 +66,6 @@ namespace NeuralNetwork.teach
                 TrainLayerNeurons(this.network.hiddenLayerNeuronsList[i]);
             }
 
-            if (this.network.GetSecondHiddenLayerNeurons() != null || this.network.GetSecondHiddenLayerNeurons().Length != 0)
-            {
-                TrainLayerNeurons(this.network.GetSecondHiddenLayerNeurons());
-            }
-            if (this.network.GetHiddenLayerNeurons() != null || this.network.GetHiddenLayerNeurons().Length != 0)
-            {
-                TrainLayerNeurons(this.network.GetHiddenLayerNeurons());
-            }
-
             TrainLayerNeurons(this.network.GetInputNeurons());
 
             return EstimateErrorRate(inputs, targets);
@@ -114,18 +105,17 @@ namespace NeuralNetwork.teach
             _doneEvent.WaitOne();
         }
 
-
         public double EstimateErrorRate(double[] inputs, double[] targets)
         {
             double totalError = 0;
+            this.network.SetInputs(inputs);
             double[] curOutputs = this.network.GetOutputsAsDoubleArray();
-            for (int i = 0; i < RANDOM_SAMPLE; i++)
+            for (int i = 0; i < curOutputs.Length; i++)
             {
-                int randomPick = random.Next(0, curOutputs.Length);
-                double result = Math.Sqrt(Math.Abs(targets[randomPick] * targets[randomPick] - curOutputs[randomPick] * curOutputs[randomPick]));
+                double result = Math.Sqrt(Math.Abs(targets[i] * targets[i] - curOutputs[i] * curOutputs[i]));
                 totalError += result;
             }
-            return Math.Round(totalError / RANDOM_SAMPLE, 4);
+            return Math.Round(totalError / curOutputs.Length, 4);
         }
 
     }

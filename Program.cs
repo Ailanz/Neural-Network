@@ -16,6 +16,9 @@ namespace NeuralNetwork
 {
     class Program
     {
+
+        static int width = 20;
+        static double curErrorRate = 1;
         static void Main(string[] args)
         {
 
@@ -23,8 +26,8 @@ namespace NeuralNetwork
             //TestBasicMath();
             //TestAdd();
             //ResizeImage();
-            TestImage(20);
-            TestImageFromSavedObj(20, @"D:\test.dat");
+            TestImage(width);
+            TestImageFromSavedObj(width, @"D:\test.dat");
             //TestRecreateImage();
             //double[] normalize = new double[] { 2, 5, 7, -1 };
             //normalize = Normalizer.Normalize(normalize, -1, 7);
@@ -40,11 +43,16 @@ namespace NeuralNetwork
         public static void CallbackMethod(Network network, List<double[]> inputs, List<double[]> targets, double errorRate, int repetition)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            if (repetition % 25 == 0)
+            if (repetition % 40 == 0)
             {
+                network.CalculateChangeDeltaByLayers();
+                //Console.WriteLine("Current Error: " + Math.Round(errorRate, 5));
+            }
+            if (curErrorRate - errorRate > 0.05)
+            {
+                curErrorRate = errorRate;
                 //CREATE IMAGE
                 network.SetInputs(inputs[0]);
-                int width = 20;
                 double[] xyz = network.GetOutputsAsDoubleArray();
                 double[] outputs1 = Normalizer.Denormalize(network.GetOutputsAsDoubleArray(), 0, 255);
                 Bitmap createdImage = ImageHelper.DoubleArrayToBitmap(outputs1, width, width);
@@ -58,7 +66,6 @@ namespace NeuralNetwork
 
                 Console.WriteLine("Error Rate: " + Math.Round(errorRate, 5));
                     //Console.WriteLine("Error Rate: " + errorRate);
-
                 stopwatch.Stop();
                 Console.WriteLine(stopwatch.ElapsedMilliseconds);
                 stopwatch = Stopwatch.StartNew();
@@ -114,13 +121,13 @@ namespace NeuralNetwork
 
             int inputSize = imgArray1.Length;
 
-            //Network network = new Network(Sigmoid.GetInstance());
-            //network.numInputNeurons = inputSize;
-            //network.numOutputNeurons = width * height * 3;
-            //network.SetNumberOfHiddenNeurons(80, 80);
-            //network.ConstructNetwork();
-            Network network = new Network(inputSize, inputSize / 3, inputSize / 3, width * height * 3, Sigmoid.GetInstance(1));
-            //Network network = new Network(inputSize, 80, 80, width * height * 3, Sigmoid.GetInstance(1));
+            Network network = new Network(Sigmoid.GetInstance());
+            network.numInputNeurons = inputSize;
+            network.numOutputNeurons = width * height * 3;
+            network.SetNumberOfHiddenNeurons(80,80);
+            network.ConstructNetwork();
+            //Network network = new Network(inputSize, inputSize / 3, inputSize / 3, width * height * 3, Sigmoid.GetInstance(1));
+           // Network network = new Network(inputSize, 500, 500, width * height * 3, Sigmoid.GetInstance(1));
 
             Neuron output1 = network.GetOutputNeurons()[0];
             Console.WriteLine("Output: " + output1.GetOutput());
