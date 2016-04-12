@@ -52,7 +52,6 @@ namespace NeuralNetwork.teach
 
                 for (int j = 0; j < neuron.weights.Length; j++)
                 {
-
                     double changeDelta = (error * inputs[j]) * learnRate + neuron.previousChangeDelta[j] * momentum;
                     //Modify each weight
                     if (!neuron.isInputLayer())

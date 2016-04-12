@@ -14,6 +14,8 @@ namespace NeuralNetwork.teach
         static Random random = new Random();
         const int RANDOM_SAMPLE = 35;
         public static int counter = 0;
+        int maxRepetition = -1;
+        int minRepetition = 0;
 
         public delegate void Callback(Network network, List<double[]> inputs, List<double[]> targets, double errorRate, int repetition);
 
@@ -27,7 +29,7 @@ namespace NeuralNetwork.teach
         {
             double sumError = Double.MaxValue;
             int repetition = 0;
-            while (sumError > precision)
+            while (sumError > precision || (maxRepetition-- > 0 || maxRepetition == -1) || repetition < minRepetition)
             {
                 sumError = 0;
                 for (int i = 0; i < inputs.Count(); i++)
@@ -116,6 +118,15 @@ namespace NeuralNetwork.teach
                 totalError += result;
             }
             return Math.Round(totalError / curOutputs.Length, 4);
+        }
+
+        public void SetMaxReptition(int i)
+        {
+            this.maxRepetition = i;
+        }
+        public void SetMinReptition(int i)
+        {
+            this.minRepetition = i;
         }
 
     }
