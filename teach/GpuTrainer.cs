@@ -134,6 +134,7 @@ namespace NeuralNetwork.teach
                 gpu.CopyToDevice(prevChangeDeltas, dev_prevChangeDelta);
                 gpu.CopyToDevice(weights, dev_weights);
 
+                // figure out how to launch Y x X Jobs
                 gpu.Launch().CalculateChangeDeltaAndError(dev_errors, dev_inputs, dev_prevChangeDelta, dev_weights, dev_changeDeltaResult, dev_backPropErrorResult);
 
                 gpu.CopyFromDevice(dev_changeDeltaResult, changeDeltaResult);
@@ -143,7 +144,7 @@ namespace NeuralNetwork.teach
                     Neuron neuron = neuronsToTrain[y];
                     for (int x = 0; x < neuron.weights.Length; x++)
                     {
-                        //index is incorrect?
+                        //index is incorrect? should use X
                         neuron.neuronInputs[y].backPropogationError += backPropErrorResult[y,x];
                         neuron.weights[y] += changeDeltaResult[y,x];
                         neuron.previousChangeDelta[y] = changeDeltaResult[y,x];
@@ -154,7 +155,7 @@ namespace NeuralNetwork.teach
                 }
                 //Modify Bias
                
-
+                // free dev_error
                 gpu.Free(dev_inputs);
                 gpu.Free(dev_prevChangeDelta);
                 gpu.Free(dev_weights);
