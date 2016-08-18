@@ -121,6 +121,7 @@ namespace NeuralNetwork.teach
                     }
                 }
 
+//Use host arrays instead of size
                 double[] dev_errors = gpu.Allocate<double>(errors);
                 double[,] dev_inputs = gpu.Allocate<double>(numNeurons, inputs.Length);
                 double[,] dev_prevChangeDelta = gpu.Allocate<double>(numNeurons, neuronsToTrain[0].previousChangeDelta.Length);
@@ -128,7 +129,7 @@ namespace NeuralNetwork.teach
                 double[,] dev_changeDeltaResult = gpu.Allocate<double>(changeDeltaResult);
                 double[,] dev_backPropErrorResult = gpu.Allocate<double>(backPropErrorResult);
 
-
+//Copy the errors!
                 gpu.CopyToDevice(inputs, dev_inputs);
                 gpu.CopyToDevice(prevChangeDeltas, dev_prevChangeDelta);
                 gpu.CopyToDevice(weights, dev_weights);
@@ -142,6 +143,7 @@ namespace NeuralNetwork.teach
                     Neuron neuron = neuronsToTrain[y];
                     for (int x = 0; x < neuron.weights.Length; x++)
                     {
+                        //index is incorrect?
                         neuron.neuronInputs[y].backPropogationError += backPropErrorResult[y,x];
                         neuron.weights[y] += changeDeltaResult[y,x];
                         neuron.previousChangeDelta[y] = changeDeltaResult[y,x];
