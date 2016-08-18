@@ -48,11 +48,11 @@
 	ld.param.u32 	%r10, [CalculateChangeDeltaAndError_param_13];
 	ld.param.u32 	%r11, [CalculateChangeDeltaAndError_param_14];
 	ld.param.u32 	%r12, [CalculateChangeDeltaAndError_param_16];
-	mov.u32 	%r1, %ctaid.x;
+	mov.u32 	%r1, %ctaid.y;
 	setp.gt.s32	%p1, %r1, 1023;
 	@%p1 bra 	BB0_2;
 
-	mov.u32 	%r13, %ctaid.y;
+	mov.u32 	%r13, %ctaid.x;
 	cvta.to.global.u32 	%r14, %r2;
 	shl.b32 	%r15, %r1, 3;
 	add.s32 	%r16, %r14, %r15;

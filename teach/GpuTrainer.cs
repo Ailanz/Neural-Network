@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Cudafy;
 using Cudafy.Host;
 using Cudafy.Translator;
+using System.Diagnostics;
 
 namespace NeuralNetwork.teach
 {
@@ -87,88 +88,99 @@ namespace NeuralNetwork.teach
 
         public void TrainOutputLayer(double[] targets)
         {
+            Stopwatch stopwatch = Stopwatch.StartNew();
             Neuron[] neuronsToTrain = this.network.GetOutputNeurons();
-            int numNeurons = neuronsToTrain.Length;             
+            int numNeurons = neuronsToTrain.Length;
 
-                double[] errors = new Double[neuronsToTrain.Length];
-                double[,] inputs = new Double[numNeurons, neuronsToTrain[0].GetInputs().Length];
-                double[,] prevChangeDeltas = new Double[numNeurons, neuronsToTrain[0].previousChangeDelta.Length];
-                double[,] weights = new Double[numNeurons, neuronsToTrain[0].weights.Length];
-                double[,] changeDeltaResult = new Double[numNeurons, neuronsToTrain[0].weights.Length];
-                double[,] backPropErrorResult = new Double[numNeurons, neuronsToTrain[0].weights.Length];
+            double[] errors = new Double[neuronsToTrain.Length];
+            double[,] inputs = new Double[numNeurons, neuronsToTrain[0].GetInputs().Length];
+            double[,] prevChangeDeltas = new Double[numNeurons, neuronsToTrain[0].previousChangeDelta.Length];
+            double[,] weights = new Double[numNeurons, neuronsToTrain[0].weights.Length];
+            double[,] changeDeltaResult = new Double[numNeurons, neuronsToTrain[0].weights.Length];
+            double[,] backPropErrorResult = new Double[numNeurons, neuronsToTrain[0].weights.Length];
+           //Console.WriteLine("1: " + stopwatch.ElapsedMilliseconds);
 
-                for (int y = 0; y < neuronsToTrain.Length; y++)
+            for (int y = 0; y < neuronsToTrain.Length; y++)
+            {
+                Neuron neuron = neuronsToTrain[y];
+                double output = neuron.GetOutput();
+                errors[y] = neuronsToTrain[0].activationFunction.GetSquashFunction(output) * (targets[y] - neuron.GetOutput());
+                neuron.backPropogationError = 0;
+
+                //Maybe group these into 1 for-loop, since should be same size
+                for (int x = 0; x < neuron.GetInputs().Length; x++)
                 {
-                    Neuron neuron = neuronsToTrain[y];
-                    double output = neuron.GetOutput();
-                    errors[y] = neuronsToTrain[0].activationFunction.GetSquashFunction(output) * (targets[y] - neuron.GetOutput());
-                    neuron.backPropogationError = 0;
-                    
-                    //Maybe group these into 1 for-loop, since should be same size
-                    for (int x = 0; x < neuron.GetInputs().Length; x++)
-                    {
-                        inputs[y, x] = neuron.GetInputs()[x];
-                    }
-
-                    for (int x = 0; x < neuron.previousChangeDelta.Length; x++)
-                    {
-                        prevChangeDeltas[y, x] = neuron.previousChangeDelta[x];
-                    }
-
-                    for (int x = 0; x < neuron.weights.Length; x++)
-                    {
-                        weights[y, x] = neuron.weights[x];
-                    }
+                    inputs[y, x] = neuron.GetInputs()[x];
                 }
 
-//Use host arrays instead of size
-                double[] dev_errors = gpu.Allocate<double>(errors);
-                double[,] dev_inputs = gpu.Allocate<double>(numNeurons, inputs.Length);
-                double[,] dev_prevChangeDelta = gpu.Allocate<double>(numNeurons, neuronsToTrain[0].previousChangeDelta.Length);
-                double[,] dev_weights = gpu.Allocate<double>(numNeurons, neuronsToTrain[0].weights.Length);
-                double[,] dev_changeDeltaResult = gpu.Allocate<double>(changeDeltaResult);
-                double[,] dev_backPropErrorResult = gpu.Allocate<double>(backPropErrorResult);
-
-//Copy the errors!
-                gpu.CopyToDevice(inputs, dev_inputs);
-                gpu.CopyToDevice(prevChangeDeltas, dev_prevChangeDelta);
-                gpu.CopyToDevice(weights, dev_weights);
-
-                // figure out how to launch Y x X Jobs
-                gpu.Launch().CalculateChangeDeltaAndError(dev_errors, dev_inputs, dev_prevChangeDelta, dev_weights, dev_changeDeltaResult, dev_backPropErrorResult);
-
-                gpu.CopyFromDevice(dev_changeDeltaResult, changeDeltaResult);
-                gpu.CopyFromDevice(dev_backPropErrorResult, backPropErrorResult);
-                for (int y = 0; y < neuronsToTrain.Length; y++)
+                for (int x = 0; x < neuron.previousChangeDelta.Length; x++)
                 {
-                    Neuron neuron = neuronsToTrain[y];
-                    for (int x = 0; x < neuron.weights.Length; x++)
-                    {
-                        //index is incorrect? should use X
-                        neuron.neuronInputs[y].backPropogationError += backPropErrorResult[y,x];
-                        neuron.weights[y] += changeDeltaResult[y,x];
-                        neuron.previousChangeDelta[y] = changeDeltaResult[y,x];
-                        //Propogate the error back to previous layer neuron
-                    }
-                    ModifyBias(neuron, errors[y]);
-                    neuron.hasUpdated = true;
+                    prevChangeDeltas[y, x] = neuron.previousChangeDelta[x];
                 }
-                //Modify Bias
-               
-                // free dev_error
-                gpu.Free(dev_inputs);
-                gpu.Free(dev_prevChangeDelta);
-                gpu.Free(dev_weights);
-                gpu.Free(dev_changeDeltaResult);
-                gpu.Free(dev_backPropErrorResult);
-            
+
+                for (int x = 0; x < neuron.weights.Length; x++)
+                {
+                    weights[y, x] = neuron.weights[x];
+                }
+            }
+            //Console.WriteLine("2: " + stopwatch.ElapsedMilliseconds);
+
+            //Use host arrays instead of size
+            double[] dev_errors = gpu.Allocate<double>(errors);
+            double[,] dev_inputs = gpu.Allocate<double>(numNeurons, inputs.Length);
+            double[,] dev_prevChangeDelta = gpu.Allocate<double>(numNeurons, neuronsToTrain[0].previousChangeDelta.Length);
+            double[,] dev_weights = gpu.Allocate<double>(numNeurons, neuronsToTrain[0].weights.Length);
+            double[,] dev_changeDeltaResult = gpu.Allocate<double>(changeDeltaResult);
+            double[,] dev_backPropErrorResult = gpu.Allocate<double>(backPropErrorResult);
+
+            gpu.CopyToDevice(errors, dev_errors);
+            gpu.CopyToDevice(inputs, dev_inputs);
+            gpu.CopyToDevice(prevChangeDeltas, dev_prevChangeDelta);
+            gpu.CopyToDevice(weights, dev_weights);
+            //Console.WriteLine("3: " + stopwatch.ElapsedMilliseconds);
+
+            // figure out how to launch Y x X Jobs
+            gpu.Launch().CalculateChangeDeltaAndError(dev_errors, dev_inputs, dev_prevChangeDelta, dev_weights, dev_changeDeltaResult, dev_backPropErrorResult);
+
+            gpu.CopyFromDevice(dev_changeDeltaResult, changeDeltaResult);
+            //Console.WriteLine("4: " + stopwatch.ElapsedMilliseconds);
+
+            gpu.CopyFromDevice(dev_backPropErrorResult, backPropErrorResult);
+            //Console.WriteLine("4.1: " + stopwatch.ElapsedMilliseconds);
+
+
+            for (int y = 0; y < neuronsToTrain.Length; y++)
+            {
+                Neuron neuron = neuronsToTrain[y];
+                for (int x = 0; x < neuron.weights.Length; x++)
+                {
+                    neuron.neuronInputs[x].backPropogationError += backPropErrorResult[y, x];
+                    neuron.weights[x] += changeDeltaResult[y, x];
+                    neuron.previousChangeDelta[x] = changeDeltaResult[y, x];
+                    //Propogate the error back to previous layer neuron
+                }
+                ModifyBias(neuron, errors[y]);
+                neuron.hasUpdated = true;
+            }
+            //Modify Bias
+            //Console.WriteLine("5: " + stopwatch.ElapsedMilliseconds);
+
+            // free dev_error
+            gpu.Free(dev_errors);
+            gpu.Free(dev_inputs);
+            gpu.Free(dev_prevChangeDelta);
+            gpu.Free(dev_weights);
+            gpu.Free(dev_changeDeltaResult);
+            gpu.Free(dev_backPropErrorResult);
+            //Console.WriteLine("6: " + stopwatch.ElapsedMilliseconds);
+            stopwatch.Stop();
         }
 
         [Cudafy]
         public static void CalculateChangeDeltaAndError(GThread thread, double[] error, double[,] inputs, double[,] previousChangeDelta, double[,] weights, double[,] changeDelta, double[,] backPropError)
         {
-            int tidx = thread.blockIdx.x;
-            int tidy = thread.blockIdx.y;
+            int tidy = thread.blockIdx.x;
+            int tidx = thread.blockIdx.y;
             if (tidx < N)
             {
                 //swap x and y

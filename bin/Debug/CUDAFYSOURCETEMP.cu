@@ -7,9 +7,9 @@ extern "C" __global__  void CalculateChangeDeltaAndError( double* error, int err
 {
 	int x = blockIdx.x;
 	int y = blockIdx.y;
-	if (x < 1024)
+	if (y < 1024)
 	{
-		changeDelta[(x) * changeDeltaLen1 + ( y)] = error[(x)] * inputs[(x) * inputsLen1 + ( y)] * 0.3 + previousChangeDelta[(x) * previousChangeDeltaLen1 + ( y)] * 0.05;
-		backPropError[(x) * backPropErrorLen1 + ( y)] = error[(x)] * weights[(x) * weightsLen1 + ( y)];
+		changeDelta[(y) * changeDeltaLen1 + ( x)] = error[(y)] * inputs[(y) * inputsLen1 + ( x)] * 0.3 + previousChangeDelta[(y) * previousChangeDeltaLen1 + ( x)] * 0.05;
+		backPropError[(y) * backPropErrorLen1 + ( x)] = error[(y)] * weights[(y) * weightsLen1 + ( x)];
 	}
 }
