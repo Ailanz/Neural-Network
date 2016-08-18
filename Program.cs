@@ -24,9 +24,9 @@ namespace NeuralNetwork
 
             //TestSimpleNetwork();
             //TestBasicMath();
-            //TestAdd();
+            TestAdd();
             //ResizeImage();
-            TestImage(width);
+            //TestImage(width);
             TestImageFromSavedObj(width, @"D:\test.dat");
             //TestRecreateImage();
             //double[] normalize = new double[] { 2, 5, 7, -1 };
@@ -40,36 +40,83 @@ namespace NeuralNetwork
             Console.Read();
         }
 
+        public static void TestAdd()
+        {
+            Network network = new Network(Sigmoid.GetInstance());
+            network.numInputNeurons = 2;
+            network.numOutputNeurons = 1;
+            network.SetNumberOfHiddenNeurons(4);
+            network.ConstructNetwork();
+            Neuron output1 = network.GetOutputNeurons()[0];
+            Console.WriteLine("Output: " + output1.GetOutput());
+            GpuTrainer trainer = new GpuTrainer(network);
+            // Console.WriteLine("Before Training: " + output1.GetOutput());
+
+            List<double[]> inputTrainingList = new List<double[]>();
+            inputTrainingList.Add(Normalizer.Normalize(new double[] { 1, 1 }, 0, 100));
+            inputTrainingList.Add(Normalizer.Normalize(new double[] { 2, 3 }, 0, 100));
+            inputTrainingList.Add(Normalizer.Normalize(new double[] { 3, 6 }, 0, 100));
+            inputTrainingList.Add(Normalizer.Normalize(new double[] { 27, 52 }, 0, 100));
+            inputTrainingList.Add(Normalizer.Normalize(new double[] { 13, 9 }, 0, 100));
+            inputTrainingList.Add(Normalizer.Normalize(new double[] { 43, 19 }, 0, 100));
+
+            List<double[]> outputTrainingList = new List<double[]>();
+            outputTrainingList.Add(Normalizer.Normalize(new double[] { 2 }, 0, 100));
+            outputTrainingList.Add(Normalizer.Normalize(new double[] { 5 }, 0, 100));
+            outputTrainingList.Add(Normalizer.Normalize(new double[] { 9 }, 0, 100));
+            outputTrainingList.Add(Normalizer.Normalize(new double[] { 79 }, 0, 100));
+            outputTrainingList.Add(Normalizer.Normalize(new double[] { 22 }, 0, 100));
+            outputTrainingList.Add(Normalizer.Normalize(new double[] { 62 }, 0, 100));
+
+            NeuralNetwork.teach.GpuTrainer.Callback handler = CallbackMethod;
+
+            trainer.Train(inputTrainingList, outputTrainingList, 0.008, handler);
+            network.SetInputs(Normalizer.Normalize(new double[] { 1, 1 }, 0, 100));
+            PrintResult(output1);
+            network.SetInputs(Normalizer.Normalize(new double[] { 2, 5 }, 0, 100));
+            PrintResult(output1);
+            network.SetInputs(Normalizer.Normalize(new double[] { 4, 8 }, 0, 100));
+            PrintResult(output1);
+            network.SetInputs(Normalizer.Normalize(new double[] { 26, 42 }, 0, 100));
+            PrintResult(output1);
+        }
+
+        static void PrintResult(Neuron output1)
+        {
+            Console.WriteLine("After Training: " + Math.Round(output1.GetOutput() * 100, 4));
+        }
+
         public static void CallbackMethod(Network network, List<double[]> inputs, List<double[]> targets, double errorRate, int repetition)
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            if (repetition % 40 == 0)
+            if (repetition % 4000 == 0)
             {
+                Console.WriteLine("Error: " + errorRate);
                 network.CalculateChangeDeltaByLayers();
                 //Console.WriteLine("Current Error: " + Math.Round(errorRate, 5));
             }
-            if (curErrorRate - errorRate > 0.05)
-            {
-                curErrorRate = errorRate;
-                //CREATE IMAGE
-                network.SetInputs(inputs[0]);
-                double[] xyz = network.GetOutputsAsDoubleArray();
-                double[] outputs1 = Normalizer.Denormalize(network.GetOutputsAsDoubleArray(), 0, 255);
-                Bitmap createdImage = ImageHelper.DoubleArrayToBitmap(outputs1, width, width);
-                createdImage.Save("C:\\Users\\Ailan\\Pictures\\test\\TEST" + repetition + ".png");
+            //if (curErrorRate - errorRate > 0.05)
+            //{
+            //    curErrorRate = errorRate;
+            //    //CREATE IMAGE
+            //    network.SetInputs(inputs[0]);
+            //    double[] xyz = network.GetOutputsAsDoubleArray();
+            //    double[] outputs1 = Normalizer.Denormalize(network.GetOutputsAsDoubleArray(), 0, 255);
+            //    Bitmap createdImage = ImageHelper.DoubleArrayToBitmap(outputs1, width, width);
+            //    createdImage.Save("C:\\Users\\Ailan\\Pictures\\test\\TEST" + repetition + ".png");
 
-                network.SetInputs(inputs[1]);
-                double[] abc = network.GetOutputsAsDoubleArray();
-                double[] outputs2 = Normalizer.Denormalize(network.GetOutputsAsDoubleArray(), 0, 255);
-                createdImage = ImageHelper.DoubleArrayToBitmap(outputs2, width, width);
-                createdImage.Save("C:\\Users\\Ailan\\Pictures\\test\\TEST-" + repetition + ".png");
+            //    network.SetInputs(inputs[1]);
+            //    double[] abc = network.GetOutputsAsDoubleArray();
+            //    double[] outputs2 = Normalizer.Denormalize(network.GetOutputsAsDoubleArray(), 0, 255);
+            //    createdImage = ImageHelper.DoubleArrayToBitmap(outputs2, width, width);
+            //    createdImage.Save("C:\\Users\\Ailan\\Pictures\\test\\TEST-" + repetition + ".png");
 
-                Console.WriteLine("Error Rate: " + Math.Round(errorRate, 5));
-                    //Console.WriteLine("Error Rate: " + errorRate);
-                stopwatch.Stop();
-                Console.WriteLine(stopwatch.ElapsedMilliseconds);
-                stopwatch = Stopwatch.StartNew();
-            }
+            //    Console.WriteLine("Error Rate: " + Math.Round(errorRate, 5));
+            //        //Console.WriteLine("Error Rate: " + errorRate);
+            //    stopwatch.Stop();
+            //    Console.WriteLine(stopwatch.ElapsedMilliseconds);
+            //    stopwatch = Stopwatch.StartNew();
+            //}
         }
 
         static void TestImageFromSavedObj(int width, string filepath)
@@ -133,7 +180,7 @@ namespace NeuralNetwork
             Console.WriteLine("Output: " + output1.GetOutput());
 
             //Trainer trainer = new Trainer(network);
-            ThreadPoolTrainer trainer = new ThreadPoolTrainer(network);
+            GpuTrainer trainer = new GpuTrainer(network);
 
             // Console.WriteLine("Before Training: " + output1.GetOutput());
 
@@ -150,7 +197,7 @@ namespace NeuralNetwork
 
 
             //NeuralNetwork.teach.Trainer.Callback handler = CallbackMethod;
-            NeuralNetwork.teach.ThreadPoolTrainer.Callback handler = CallbackMethod;
+            NeuralNetwork.teach.GpuTrainer.Callback handler = CallbackMethod;
 
             trainer.Train(inputTrainingList, outputTrainingList, 0.10, handler);
 

@@ -139,12 +139,12 @@ namespace NeuralNetwork.neuron
                 {
                     if (weights[i] > 1)
                     {
-                        weights[i] = 0.99999999999999;
+                        //weights[i] = 0.99999999999999;
                     }
 
                     if(weights[i] < -1)
                     {
-                        weights[i] = -0.99999999999999;
+                        //weights[i] = -0.99999999999999;
                     }
                     sum += neuronInputs[i].GetOutput() * weights[i];
                 }
