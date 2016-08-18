@@ -103,6 +103,8 @@ namespace NeuralNetwork.teach
                     double output = neuron.GetOutput();
                     errors[y] = neuronsToTrain[0].activationFunction.GetSquashFunction(output) * (targets[y] - neuron.GetOutput());
                     neuron.backPropogationError = 0;
+                    
+                    //Maybe group these into 1 for-loop, since should be same size
                     for (int x = 0; x < neuron.GetInputs().Length; x++)
                     {
                         inputs[y, x] = neuron.GetInputs()[x];
