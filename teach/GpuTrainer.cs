@@ -90,8 +90,6 @@ namespace NeuralNetwork.teach
             Neuron[] neuronsToTrain = this.network.GetOutputNeurons();
             int numNeurons = neuronsToTrain.Length;             
 
-   
-
                 double[] errors = new Double[neuronsToTrain.Length];
                 double[,] inputs = new Double[numNeurons, neuronsToTrain[0].GetInputs().Length];
                 double[,] prevChangeDeltas = new Double[numNeurons, neuronsToTrain[0].previousChangeDelta.Length];
