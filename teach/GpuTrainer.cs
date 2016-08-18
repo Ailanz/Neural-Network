@@ -171,6 +171,7 @@ namespace NeuralNetwork.teach
             int tidy = thread.blockIdx.y;
             if (tidx < N)
             {
+                //swap x and y
                 changeDelta[tidx, tidy] = (error[tidx] * inputs[tidx, tidy]) * learnRate + previousChangeDelta[tidx, tidy] * momentum;
                 backPropError[tidx, tidy] = error[tidx] * weights[tidx, tidy];
             }
