@@ -1,6 +1,7 @@
 ﻿using NeuralNetwork.neuron;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -8,12 +9,14 @@ using System.Threading.Tasks;
 
 namespace NeuralNetwork.teach
 {
-    class ThreadPoolTrainer
+    public class ThreadPoolTrainer
     {
         Network network;
         static Random random = new Random();
         const int RANDOM_SAMPLE = 35;
         public static int counter = 0;
+        int maxRepetition = -1;
+        int minRepetition = 0;
 
         public delegate void Callback(Network network, List<double[]> inputs, List<double[]> targets, double errorRate, int repetition);
 
@@ -24,11 +27,13 @@ namespace NeuralNetwork.teach
         }
 
         public double Train(List<double[]> inputs, List<double[]> targets, double precision, Callback callback)
-        {  
+        {
             double sumError = Double.MaxValue;
             int repetition = 0;
-            while (sumError > precision)
+            while (sumError > precision || (maxRepetition-- > 0 || maxRepetition == -1) || repetition < minRepetition)
             {
+                //Stopwatch stopwatch = Stopwatch.StartNew();
+
                 sumError = 0;
                 for (int i = 0; i < inputs.Count(); i++)
                 {
@@ -43,8 +48,9 @@ namespace NeuralNetwork.teach
                 }
 
                 repetition++;
+                //Console.WriteLine("Iteration: " + stopwatch.ElapsedMilliseconds);
             }
-            Console.WriteLine("Stopped at: " + repetition + " with error: " + sumError );
+            Console.WriteLine("Stopped at: " + repetition + " with error: " + sumError);
             return sumError;
         }
 
@@ -60,17 +66,15 @@ namespace NeuralNetwork.teach
 
             //Input and Output layer neurons are always non-null
             TrainOutputLayer(targets);
-            if (this.network.GetSecondHiddenLayerNeurons() != null || this.network.GetSecondHiddenLayerNeurons().Length != 0)
+
+            for (int i = this.network.hiddenLayerNeuronsList.Count-1 ; i >= 0; i--)
             {
-                TrainLayerNeurons(this.network.GetSecondHiddenLayerNeurons());
+                TrainLayerNeurons(this.network.hiddenLayerNeuronsList[i]);
             }
-            if (this.network.GetHiddenLayerNeurons() != null || this.network.GetHiddenLayerNeurons().Length != 0)
-            {
-                TrainLayerNeurons(this.network.GetHiddenLayerNeurons());
-            }
+
             TrainLayerNeurons(this.network.GetInputNeurons());
 
-            return EstimateErrorRate(inputs, targets);           
+            return EstimateErrorRate(inputs, targets);
         }
 
 
@@ -97,7 +101,7 @@ namespace NeuralNetwork.teach
             ManualResetEvent _doneEvent = new ManualResetEvent(false);
             TrainWorker[] workers = new TrainWorker[neurons.Length];
             TrainWorker.counter = neurons.Length;
-            TrainWorker.doneEvent = _doneEvent; 
+            TrainWorker.doneEvent = _doneEvent;
             counter = neurons.Length;
             for (int i = 0; i < neurons.Length; i++)
             {
@@ -107,18 +111,26 @@ namespace NeuralNetwork.teach
             _doneEvent.WaitOne();
         }
 
-
         public double EstimateErrorRate(double[] inputs, double[] targets)
         {
             double totalError = 0;
+            this.network.SetInputs(inputs);
             double[] curOutputs = this.network.GetOutputsAsDoubleArray();
-            for (int i = 0; i < RANDOM_SAMPLE; i++)
+            for (int i = 0; i < curOutputs.Length; i++)
             {
-                int randomPick = random.Next(0, curOutputs.Length);
-                double result = Math.Sqrt(Math.Abs(targets[randomPick] * targets[randomPick] - curOutputs[randomPick] * curOutputs[randomPick]));
+                double result = Math.Sqrt(Math.Abs(targets[i] * targets[i] - curOutputs[i] * curOutputs[i]));
                 totalError += result;
             }
-            return Math.Round(totalError / RANDOM_SAMPLE, 4);
+            return Math.Round(totalError / curOutputs.Length, 4);
+        }
+
+        public void SetMaxReptition(int i)
+        {
+            this.maxRepetition = i;
+        }
+        public void SetMinReptition(int i)
+        {
+            this.minRepetition = i;
         }
 
     }

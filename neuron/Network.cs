@@ -14,109 +14,77 @@ namespace NeuralNetwork.neuron
     [Serializable()]
     public class Network
     {
+        public int numInputNeurons { get; set; }
+        public int numOutputNeurons { get; set; }
+        private List<int> numHiddenNeurons = new List<int>();
+
+        public double[] currentInput;
         public Neuron[] inputLayerNeurons;
-        public Neuron[] hiddenLayerNeurons;
-        public Neuron[] secondHiddenLayerNeurons;
+        public List<Neuron[]> hiddenLayerNeuronsList = new List<Neuron[]>();
         public Neuron[] outputLayerNeurons;
+        ActivationFunction activationFunction;
 
-        public Network() { }
-
-        //If no Activation Function is declared, it will use Sigmoid as default
-        public Network(int numInputLayer, int numHiddenLayers,  int numSecondHiddenLayerNeurons, int numOutputs) 
-            : this(numInputLayer, numHiddenLayers, numSecondHiddenLayerNeurons, numOutputs, Sigmoid.GetInstance())
-        {           
+        public Network(ActivationFunction activationFunction)
+        {
+            this.activationFunction = activationFunction;
         }
 
-        public Network(int numInputLayer, int numHiddenLayers, int numSecondHiddenLayerNeurons, int numOutputs, ActivationFunction activationFunction)
+        public void ConstructNetwork()
         {
-            inputLayerNeurons = new Neuron[numInputLayer];
-            hiddenLayerNeurons = new Neuron[numHiddenLayers];
-            secondHiddenLayerNeurons = new Neuron[numSecondHiddenLayerNeurons];
-            outputLayerNeurons = new Neuron[numOutputs];
-
-            for (int i = 0; i < numInputLayer; i++)
+            if (numInputNeurons == 0 || numOutputNeurons == 0 || numHiddenNeurons.Count == 0)
             {
-                inputLayerNeurons[i] = new Neuron(numInputLayer, activationFunction);
+                throw new Exception("Invalid Network State, 1 or more layer of neurons are null");
             }
 
-            for (int i = 0; i < numHiddenLayers; i++)
+            inputLayerNeurons = new Neuron[numInputNeurons];
+            outputLayerNeurons = new Neuron[numOutputNeurons];
+            for (int i = 0; i < numInputNeurons; i++)
             {
-                hiddenLayerNeurons[i] = new Neuron(inputLayerNeurons, activationFunction);
+                inputLayerNeurons[i] = new Neuron(numInputNeurons, activationFunction, this);
             }
 
-            for (int i = 0; i < numSecondHiddenLayerNeurons; i++)
+            for (int i = 0; i < numHiddenNeurons.Count; i++)
             {
-                secondHiddenLayerNeurons[i] = new Neuron(hiddenLayerNeurons, activationFunction);
-            }
-
-            for (int i = 0; i < numOutputs; i++)
-            {
-                if (secondHiddenLayerNeurons.Length != 0)
+                Neuron[] hiddenenNeurons = new Neuron[numHiddenNeurons[i]];
+                for (int j = 0; j < numHiddenNeurons[i]; j++)
                 {
-                    outputLayerNeurons[i] = new Neuron(secondHiddenLayerNeurons, activationFunction);
+                    if (i == 0)
+                    {
+                        hiddenenNeurons[j] = new Neuron(inputLayerNeurons, activationFunction, this);
+                    }
+                    else
+                    {
+                        hiddenenNeurons[j] = new Neuron(hiddenLayerNeuronsList[i - 1], activationFunction, this);
+                    }
                 }
-                else if (hiddenLayerNeurons.Length != 0)
-                {
-                    outputLayerNeurons[i] = new Neuron(hiddenLayerNeurons, activationFunction);
-                }
-                else
-                {
-                    outputLayerNeurons[i] = new Neuron(inputLayerNeurons, activationFunction);
-                }
+                hiddenLayerNeuronsList.Add(hiddenenNeurons);
             }
-            Console.WriteLine("Total number of neurons: " + (inputLayerNeurons.Length + hiddenLayerNeurons.Length + secondHiddenLayerNeurons.Length + outputLayerNeurons.Length));
-            Console.WriteLine("Number of connections {0} * {1} * {2} * {3}: " + (double)(inputLayerNeurons.Length * hiddenLayerNeurons.Length * secondHiddenLayerNeurons.Length * outputLayerNeurons.Length)
-                , inputLayerNeurons.Length, hiddenLayerNeurons.Length , secondHiddenLayerNeurons.Length, outputLayerNeurons.Length);
+
+            for (int i = 0; i < numOutputNeurons; i++)
+            {
+                outputLayerNeurons[i] = new Neuron(hiddenLayerNeuronsList[hiddenLayerNeuronsList.Count - 1], activationFunction, this);
+            }
         }
 
 
-
-        public void SetInputLayerNeurons(Neuron[] neurons)
+        public void SetNumberOfHiddenNeurons(params int[] numNeurons)
         {
-            this.inputLayerNeurons = neurons;
+            foreach (int i in numNeurons)
+            {
+                if(i==0)
+                {
+                    throw new Exception("Invalid neuron number: 0");
+                }
+                numHiddenNeurons.Add(i);
+            }
         }
-
-        public void SetHiddenLayerNeurons(Neuron[] neurons)
-        {
-            this.hiddenLayerNeurons = neurons;
-        }
-
-        public void SetOutputLayerNeurons(Neuron[] neurons)
-        {
-            this.outputLayerNeurons = neurons;
-        }
-
-       
 
         public void SetInputs(double[] inputs)
         {
-            ResetAllCachedOutput();
+            this.currentInput = inputs;
             for (int i = 0; i < inputLayerNeurons.Length; i++)
             {
                 inputLayerNeurons[i].doubleInputs = inputs;
-            }
-        }
-
-        public void ResetAllCachedOutput()
-        {
-            for (int i = 0; i < inputLayerNeurons.Length; i++)
-            {
-                inputLayerNeurons[i].weightsHashCode = -1;
-            }
-
-            for (int i = 0; i < hiddenLayerNeurons.Length; i++)
-            {
-                hiddenLayerNeurons[i].weightsHashCode = -1;
-            }
-
-            for (int i = 0; i < secondHiddenLayerNeurons.Length; i++)
-            {
-                secondHiddenLayerNeurons[i].weightsHashCode = -1;
-            }
-
-            for (int i = 0; i < outputLayerNeurons.Length; i++)
-            {
-                outputLayerNeurons[i].weightsHashCode = -1;
             }
         }
 
@@ -129,26 +97,61 @@ namespace NeuralNetwork.neuron
         {
             //ResetAllCachedOutput();
             double[] outputs = new double[outputLayerNeurons.Length];
-            for(int i=0; i < outputLayerNeurons.Length; i++)
+            for (int i = 0; i < outputLayerNeurons.Length; i++)
             {
                 outputs[i] = outputLayerNeurons[i].GetOutput();
             }
             return outputs;
         }
 
-        public Neuron[] GetHiddenLayerNeurons()
-        {
-            return hiddenLayerNeurons;
-        }
-
-        public Neuron[] GetSecondHiddenLayerNeurons()
-        {
-            return secondHiddenLayerNeurons;
-        }
 
         public Neuron[] GetInputNeurons()
         {
             return inputLayerNeurons;
+        }
+
+        public void CalculateChangeDeltaByLayers()
+        {
+            double sumInputLayerChangeDelta = 0;
+            foreach (Neuron n in GetInputNeurons())
+            {
+                sumInputLayerChangeDelta += n.previousChangeDelta.Sum(i => Math.Abs(i) / GetInputNeurons().Length);
+            }
+
+            List<double> hiddenDeltas = new List<double>();
+            foreach (Neuron[] nl in hiddenLayerNeuronsList)
+            {
+                double sumHiddenLayerChangeDelta = 0;
+                foreach (Neuron n in nl)
+                {
+                    sumHiddenLayerChangeDelta += n.previousChangeDelta.Sum(i => Math.Abs(i) / nl.Length);
+                }
+                hiddenDeltas.Add(sumHiddenLayerChangeDelta);
+            }
+
+            double sumHiddenDeltas = 0;
+            foreach(double d in hiddenDeltas)
+            {
+                sumHiddenDeltas += d;
+            }
+            sumHiddenDeltas = sumHiddenDeltas;
+
+            double sumOutputLayerChangeDelta = 0;
+            foreach (Neuron n in GetOutputNeurons())
+            {
+                sumOutputLayerChangeDelta += n.previousChangeDelta.Sum(i => Math.Abs(i) / GetOutputNeurons().Length);
+            }
+
+            double total = sumInputLayerChangeDelta + sumHiddenDeltas + sumOutputLayerChangeDelta;
+
+            String output = String.Format("Change Ratio: Input: {0}", Math.Round(sumInputLayerChangeDelta * 100 / total, 2));
+
+            foreach (double d in hiddenDeltas)
+            {
+                output += String.Format(" Hidden: {0}, ", Math.Round(d * 100 / total, 2));
+            }
+
+            Console.WriteLine(output + " Output: {0}", Math.Round(sumOutputLayerChangeDelta * 100 / total, 2));
         }
 
         public void SerializeNetworkToFile(string filepath)
@@ -188,7 +191,7 @@ namespace NeuralNetwork.neuron
 
                 // Deserialize the hashtable from the file and 
                 // assign the reference to the local variable.
-                network  = (Network)formatter.Deserialize(fs);
+                network = (Network)formatter.Deserialize(fs);
             }
             catch (SerializationException e)
             {
