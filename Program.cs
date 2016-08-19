@@ -49,43 +49,45 @@ namespace NeuralNetwork
             network.ConstructNetwork();
             Neuron output1 = network.GetOutputNeurons()[0];
             Console.WriteLine("Output: " + output1.GetOutput());
-            ThreadPoolTrainer trainer = new ThreadPoolTrainer(network);
 
-            //GpuTrainer trainer = new GpuTrainer(network);
-            // Console.WriteLine("Before Training: " + output1.GetOutput());
+            //Trainer trainer = new Trainer(network);
+            //ThreadPoolTrainer trainer = new ThreadPoolTrainer(network);
+            GpuTrainer trainer = new GpuTrainer(network);
+             
+            Console.WriteLine("Before Training: " + output1.GetOutput());
 
             List<double[]> inputTrainingList = new List<double[]>();
-            inputTrainingList.Add(Normalizer.Normalize(new double[] { 1, 1 }, 0, 100));
-            inputTrainingList.Add(Normalizer.Normalize(new double[] { 2, 3 }, 0, 100));
-            inputTrainingList.Add(Normalizer.Normalize(new double[] { 3, 6 }, 0, 100));
+            inputTrainingList.Add(Normalizer.Normalize(new double[] { 1, 1 }, 0, 20));
+            inputTrainingList.Add(Normalizer.Normalize(new double[] { 2, 3 }, 0, 20));
+            inputTrainingList.Add(Normalizer.Normalize(new double[] { 3, 6 }, 0, 20));
             
 
             List<double[]> outputTrainingList = new List<double[]>();
-            outputTrainingList.Add(Normalizer.Normalize(new double[] { 2 }, 0, 100));
-            outputTrainingList.Add(Normalizer.Normalize(new double[] { 5 }, 0, 100));
-            outputTrainingList.Add(Normalizer.Normalize(new double[] { 9 }, 0, 100));
+            outputTrainingList.Add(Normalizer.Normalize(new double[] { 2 }, 0, 20));
+            outputTrainingList.Add(Normalizer.Normalize(new double[] { 5 }, 0, 20));
+            outputTrainingList.Add(Normalizer.Normalize(new double[] { 9 }, 0, 20));
 
-            NeuralNetwork.teach.ThreadPoolTrainer.Callback handler = CallbackMethod;
+            //NeuralNetwork.teach.Trainer.Callback handler = CallbackMethod;
+            //NeuralNetwork.teach.ThreadPoolTrainer.Callback handler = CallbackMethod;
+            NeuralNetwork.teach.GpuTrainer.Callback handler = CallbackMethod;
 
             trainer.Train(inputTrainingList, outputTrainingList, 0.012, handler);
-            network.SetInputs(Normalizer.Normalize(new double[] { 1, 1 }, 0, 100));
-            PrintResult(output1);
-            network.SetInputs(Normalizer.Normalize(new double[] { 2, 5 }, 0, 100));
-            PrintResult(output1);
-            network.SetInputs(Normalizer.Normalize(new double[] { 4, 8 }, 0, 100));
-            PrintResult(output1);
-            network.SetInputs(Normalizer.Normalize(new double[] { 26, 42 }, 0, 100));
-            PrintResult(output1);
+            network.SetInputs(Normalizer.Normalize(new double[] { 1, 1 }, 0, 20));
+            PrintResult(network.GetOutputsAsDoubleArray());
+            network.SetInputs(Normalizer.Normalize(new double[] { 2, 5 }, 0, 20));
+            PrintResult(network.GetOutputsAsDoubleArray());
+            network.SetInputs(Normalizer.Normalize(new double[] { 4, 8 }, 0, 20));
+            PrintResult(network.GetOutputsAsDoubleArray());
         }
 
-        static void PrintResult(Neuron output1)
+        static void PrintResult(double[] output)
         {
-            Console.WriteLine("After Training: " + Math.Round(output1.GetOutput() * 100, 4));
+            Console.WriteLine("After Training: " + Normalizer.Denormalize(output,0,20)[0]);
         }
 
         public static void CallbackMethod(Network network, List<double[]> inputs, List<double[]> targets, double errorRate, int repetition)
         {
-            Stopwatch stopwatch = Stopwatch.StartNew();
+            //Stopwatch stopwatch = Stopwatch.StartNew();
             if (repetition % 1000 == 0)
             {
                 Console.WriteLine("Error: " + errorRate);

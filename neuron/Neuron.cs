@@ -74,7 +74,7 @@ namespace NeuralNetwork.neuron
                 previousChangeDelta = new double[length];
                 for (int i = 0; i < length; i++)
                 {
-                    weights[i] = 0;// rand.Next(0, 100) / 100.0;
+                    weights[i] =  rand.Next(-100, 100) / 100.0;
                     previousChangeDelta[i] = 0;
                 }
             }
@@ -110,6 +110,7 @@ namespace NeuralNetwork.neuron
                 double[] inputs = new double[this.neuronInputs.Length];
                 for(int i = 0; i < inputs.Length; i++)
                 {
+                    //future?
                     inputs[i] = this.neuronInputs[i].GetOutput();
                 }
                 return inputs;
@@ -137,20 +138,12 @@ namespace NeuralNetwork.neuron
             {
                 for (int i = 0; i < neuronInputs.Length; i++)
                 {
-                    if (weights[i] > 1)
-                    {
-                        //weights[i] = 0.99999999999999;
-                    }
-
-                    if(weights[i] < -1)
-                    {
-                        //weights[i] = -0.99999999999999;
-                    }
+                    //maybe use a future?  
                     sum += neuronInputs[i].GetOutput() * weights[i];
                 }
             }
 
-            if (!isInputLayer())
+           // if (!isInputLayer())
             {
                 //Input Layer Does not use Bias
                 sum += BIAS * BIAS_WEIGHT;

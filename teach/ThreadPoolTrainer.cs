@@ -1,6 +1,7 @@
 ﻿using NeuralNetwork.neuron;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -31,6 +32,8 @@ namespace NeuralNetwork.teach
             int repetition = 0;
             while (sumError > precision || (maxRepetition-- > 0 || maxRepetition == -1) || repetition < minRepetition)
             {
+                //Stopwatch stopwatch = Stopwatch.StartNew();
+
                 sumError = 0;
                 for (int i = 0; i < inputs.Count(); i++)
                 {
@@ -45,6 +48,7 @@ namespace NeuralNetwork.teach
                 }
 
                 repetition++;
+                //Console.WriteLine("Iteration: " + stopwatch.ElapsedMilliseconds);
             }
             Console.WriteLine("Stopped at: " + repetition + " with error: " + sumError);
             return sumError;
