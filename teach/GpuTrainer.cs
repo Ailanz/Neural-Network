@@ -136,6 +136,7 @@ namespace NeuralNetwork.teach
                 double[] neuronInputs = neuron.GetInputs();
                 for (int x = 0; x < neuronInputs.Length; x++)
                 {
+                    //Run in Parallel
                     inputs[y, x] = neuronInputs[x];
                     prevChangeDeltas[y, x] = neuron.previousChangeDelta[x];
                     weights[y, x] = neuron.weights[x];
@@ -155,6 +156,7 @@ namespace NeuralNetwork.teach
             }
             //Console.WriteLine("2.5: " + stopwatch.ElapsedMilliseconds);
 
+            //Run in Parallel
             gpu.CopyToDevice(errors, dev_errors);
             gpu.CopyToDevice(inputs, dev_inputs);
             gpu.CopyToDevice(prevChangeDeltas, dev_prevChangeDelta);
@@ -176,6 +178,7 @@ namespace NeuralNetwork.teach
                 Neuron neuron = neuronsToTrain[y];
                 for (int x = 0; x < neuron.weights.Length; x++)
                 {
+                    //Run in Parallel
                     neuron.neuronInputs[x].backPropogationError += backPropErrorResult[y, x];
                     neuron.weights[x] += changeDeltaResult[y, x];
                     neuron.previousChangeDelta[x] = changeDeltaResult[y, x];
