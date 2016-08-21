@@ -11,6 +11,7 @@ using System.IO;
 namespace NeuralNetwork.normalizer
 {
     public class ImageHelper
+
     {
         public static Bitmap ResizeImage(Image image, int width, int height)
         {

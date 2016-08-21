@@ -11,10 +11,15 @@ namespace NeuralNetwork.neuron
     [Serializable()]
     public class Neuron
     {
+
+        public Network network { get; set; }
+
         static Random rand = new Random();
         public double[] weights { get; set; }
 
-        public int weightsHashCode = 0;
+        public Boolean hasUpdated = true;
+        double[] cachedInputs;
+
         public double[] previousChangeDelta { get; set; }
         public double[] doubleInputs { get; set; }
 
@@ -32,33 +37,31 @@ namespace NeuralNetwork.neuron
 
         String ERROR_LENGTH_MISMATCH = "Weight length does not match input length, {0} and {1}";
 
-        public Neuron()
-        { 
-        }
-        public Neuron(ActivationFunction activationFunction) 
+
+        private Neuron(ActivationFunction activationFunction) 
         {
             this.activationFunction = activationFunction;
             backPropogationError = 0;
             BIAS_WEIGHT = rand.Next(-100, 100) / 100.0;
         }
 
-        public Neuron(int numInputs, ActivationFunction activationFunction)
+        private Neuron(int numInputs, ActivationFunction activationFunction)
             : this(activationFunction)
         {
             RandomizeWeights(numInputs);
         }
 
-        public Neuron(double[] weights, ActivationFunction activationFunction)
-            : this(activationFunction)
+        public Neuron(int numInputs, ActivationFunction activationFunction, Network network)
+            : this(numInputs, activationFunction)
         {
-            this.weights = weights;
-            this.previousChangeDelta = new double[weights.Length];
+            this.network = network;
         }
 
-        public Neuron(Neuron[] inputs, ActivationFunction activationFunction)
+        public Neuron(Neuron[] inputs, ActivationFunction activationFunction, Network network)
             : this(activationFunction)
         {
             this.neuronInputs = inputs;
+            this.network = network;
             RandomizeWeights(this.neuronInputs.Length);
         }
 
@@ -71,7 +74,7 @@ namespace NeuralNetwork.neuron
                 previousChangeDelta = new double[length];
                 for (int i = 0; i < length; i++)
                 {
-                    weights[i] = 0;// rand.Next(0, 100) / 100.0;
+                    weights[i] =  rand.Next(-100, 100) / 100.0;
                     previousChangeDelta[i] = 0;
                 }
             }
@@ -107,6 +110,7 @@ namespace NeuralNetwork.neuron
                 double[] inputs = new double[this.neuronInputs.Length];
                 for(int i = 0; i < inputs.Length; i++)
                 {
+                    //future?
                     inputs[i] = this.neuronInputs[i].GetOutput();
                 }
                 return inputs;
@@ -118,7 +122,7 @@ namespace NeuralNetwork.neuron
         {
             double sum = 0;
 
-            if (this.weights.GetHashCode() + this.BIAS_WEIGHT.GetHashCode() == this.weightsHashCode)
+            if (!hasUpdated && this.cachedInputs == this.network.currentInput)
             {
                 return this.cachedOutput;
             }
@@ -134,18 +138,20 @@ namespace NeuralNetwork.neuron
             {
                 for (int i = 0; i < neuronInputs.Length; i++)
                 {
+                    //maybe use a future?  
                     sum += neuronInputs[i].GetOutput() * weights[i];
                 }
             }
 
-            if (!isInputLayer())
+           // if (!isInputLayer())
             {
                 //Input Layer Does not use Bias
                 sum += BIAS * BIAS_WEIGHT;
             }
             double output = this.activationFunction.GetResult(sum);
+            this.hasUpdated = false;
+            this.cachedInputs = this.network.currentInput;
             this.cachedOutput = output;
-            this.weightsHashCode = this.weights.GetHashCode() + BIAS_WEIGHT.GetHashCode();
             return output;
         }
   

@@ -12,8 +12,8 @@ namespace NeuralNetwork.teach
     {
         private Neuron neuron;
 
-        const double learnRate = 0.25;
-        const double momentum = 0.1;
+        const double learnRate = 0.30;
+        const double momentum = 0.05;
         double error = 0;
         static Random random = new Random();
         const int RANDOM_SAMPLE = 35;
@@ -49,19 +49,15 @@ namespace NeuralNetwork.teach
                 double error = neuron.activationFunction.GetSquashFunction(output) * this.error;
                 neuron.backPropogationError = 0;
                 double[] inputs = neuron.GetInputs(); //0.15
-                List<KeyValuePair<Neuron, double>> backPropErrorList = new List<KeyValuePair<Neuron, double>>();
 
                 for (int j = 0; j < neuron.weights.Length; j++)
                 {
-
                     double changeDelta = (error * inputs[j]) * learnRate + neuron.previousChangeDelta[j] * momentum;
                     //Modify each weight
                     if (!neuron.isInputLayer())
                     {
                         double backPropError = error * neuron.weights[j];
-
                         neuron.neuronInputs[j].backPropogationError += backPropError;
-
                     }
                     neuron.weights[j] += changeDelta;
                     neuron.previousChangeDelta[j] = changeDelta;
@@ -69,6 +65,7 @@ namespace NeuralNetwork.teach
                 }
                 //Modify Bias
                 ModifyBias(neuron, error);
+                neuron.hasUpdated = true;
             }
         }
 
