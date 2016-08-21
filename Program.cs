@@ -63,9 +63,12 @@ namespace NeuralNetwork
             
 
             List<double[]> outputTrainingList = new List<double[]>();
-            outputTrainingList.Add(Normalizer.Normalize(new double[] { 2 }, 0, 20));
-            outputTrainingList.Add(Normalizer.Normalize(new double[] { 5 }, 0, 20));
-            outputTrainingList.Add(Normalizer.Normalize(new double[] { 9 }, 0, 20));
+            //outputTrainingList.Add(Normalizer.Normalize(new double[] { 2, 2, 2, 2, 2 }, 0, 20));
+            //outputTrainingList.Add(Normalizer.Normalize(new double[] { 5, 5 ,5 ,5 ,5 }, 0, 20));
+            //outputTrainingList.Add(Normalizer.Normalize(new double[] { 9, 9, 9, 9, 9 }, 0, 20));
+            outputTrainingList.Add(Normalizer.Normalize(new double[] { 2}, 0, 20));
+            outputTrainingList.Add(Normalizer.Normalize(new double[] { 5}, 0, 20));
+            outputTrainingList.Add(Normalizer.Normalize(new double[] { 9}, 0, 20));
 
             //NeuralNetwork.teach.Trainer.Callback handler = CallbackMethod;
             //NeuralNetwork.teach.ThreadPoolTrainer.Callback handler = CallbackMethod;

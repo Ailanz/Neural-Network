@@ -32,7 +32,7 @@ namespace NeuralNetwork.teach
         double[,] changeDeltaResult = null;
         double[,] backPropErrorResult = null;
 
-        double[]  dev_errors = null;
+        double[] dev_errors = null;
         double[,] dev_inputs = null;
         double[,] dev_prevChangeDelta = null;
         double[,] dev_weights = null;
@@ -54,13 +54,11 @@ namespace NeuralNetwork.teach
 
         public double Train(List<double[]> inputs, List<double[]> targets, double precision, Callback callback)
         {
-
             double sumError = Double.MaxValue;
             int repetition = 0;
             while (sumError > precision || (maxRepetition-- > 0 || maxRepetition == -1) || repetition < minRepetition)
             {
-                //Stopwatch stopwatch = Stopwatch.StartNew();
-
+                Stopwatch stopwatch = Stopwatch.StartNew();
                 sumError = 0;
                 for (int i = 0; i < inputs.Count(); i++)
                 {
@@ -75,7 +73,7 @@ namespace NeuralNetwork.teach
                 }
 
                 repetition++;
-                //Console.WriteLine("Iteration: " + stopwatch.ElapsedMilliseconds);
+                Console.WriteLine("Iteration: " + stopwatch.ElapsedMilliseconds);
 
             }
             Console.WriteLine("Stopped at: " + repetition + " with error: " + sumError);
@@ -123,9 +121,9 @@ namespace NeuralNetwork.teach
                 backPropErrorResult = new double[numNeurons, lengthOfInputsAndWeights];
             }
 
-           //Console.WriteLine("1: " + stopwatch.ElapsedMilliseconds);
+            //Console.WriteLine("1: " + stopwatch.ElapsedMilliseconds);
 
-            for (int y = 0; y < neuronsToTrain.Length; y++)
+            Parallel.For(0, neuronsToTrain.Length, y =>
             {
                 Neuron neuron = neuronsToTrain[y];
                 double output = neuron.GetOutput();
@@ -134,27 +132,49 @@ namespace NeuralNetwork.teach
                 neuron.backPropogationError = 0;
 
                 double[] neuronInputs = neuron.GetInputs();
-                for (int x = 0; x < neuronInputs.Length; x++)
+
+                Parallel.Invoke(() =>
                 {
-                    //Run in Parallel
-                    inputs[y, x] = neuronInputs[x];
-                    prevChangeDeltas[y, x] = neuron.previousChangeDelta[x];
-                    weights[y, x] = neuron.weights[x];
+                    for (int x = 0; x < neuronInputs.Length; x++)
+                    {
+                        //Run in Parallel
+                        prevChangeDeltas[y, x] = neuron.previousChangeDelta[x];
+                    }
+                },
+                () =>
+                {
+                    for (int x = 0; x < neuronInputs.Length; x++)
+                    {
+                        //Run in Parallel
+                        inputs[y, x] = neuronInputs[x];
+                    }
+                },
+                () =>
+                {
+                    for (int x = 0; x < neuronInputs.Length; x++)
+                    {
+                        //Run in Parallel                    
+                        weights[y, x] = neuron.weights[x];
+                    }
                 }
-            }
+                );
+            });
+
             //Console.WriteLine("2: " + stopwatch.ElapsedMilliseconds);
+            //stopwatch.Restart();
 
             //Use host arrays instead of size
             if (dev_errors == null)
             {
-               dev_errors = gpu.Allocate<double>(errors);
-               dev_inputs = gpu.Allocate<double>(numNeurons, inputs.Length);
-               dev_prevChangeDelta = gpu.Allocate<double>(numNeurons, neuronsToTrain[0].previousChangeDelta.Length);
-               dev_weights = gpu.Allocate<double>(numNeurons, neuronsToTrain[0].weights.Length);
-               dev_changeDeltaResult = gpu.Allocate<double>(changeDeltaResult);
-               dev_backPropErrorResult = gpu.Allocate<double>(backPropErrorResult);
+                dev_errors = gpu.Allocate<double>(errors);
+                dev_inputs = gpu.Allocate<double>(numNeurons, inputs.Length);
+                dev_prevChangeDelta = gpu.Allocate<double>(numNeurons, neuronsToTrain[0].previousChangeDelta.Length);
+                dev_weights = gpu.Allocate<double>(numNeurons, neuronsToTrain[0].weights.Length);
+                dev_changeDeltaResult = gpu.Allocate<double>(changeDeltaResult);
+                dev_backPropErrorResult = gpu.Allocate<double>(backPropErrorResult);
             }
-            //Console.WriteLine("2.5: " + stopwatch.ElapsedMilliseconds);
+            // Console.WriteLine("2.5: " + stopwatch.ElapsedMilliseconds);
+            //stopwatch.Restart();
 
             //Run in Parallel
             gpu.CopyToDevice(errors, dev_errors);
@@ -162,6 +182,7 @@ namespace NeuralNetwork.teach
             gpu.CopyToDevice(prevChangeDeltas, dev_prevChangeDelta);
             gpu.CopyToDevice(weights, dev_weights);
             //Console.WriteLine("3: " + stopwatch.ElapsedMilliseconds);
+            //stopwatch.Restart();
 
             // figure out how to launch Y x X Jobs
             gpu.Launch().CalculateChangeDeltaAndError(dev_errors, dev_inputs, dev_prevChangeDelta, dev_weights, dev_changeDeltaResult, dev_backPropErrorResult);
@@ -171,22 +192,43 @@ namespace NeuralNetwork.teach
 
             gpu.CopyFromDevice(dev_backPropErrorResult, backPropErrorResult);
             //Console.WriteLine("4.1: " + stopwatch.ElapsedMilliseconds);
+           // stopwatch.Restart();
 
-
-            for (int y = 0; y < neuronsToTrain.Length; y++)
+            Parallel.For(0, neuronsToTrain.Length, y =>
             {
                 Neuron neuron = neuronsToTrain[y];
-                for (int x = 0; x < neuron.weights.Length; x++)
+
+                Parallel.Invoke(() =>
                 {
-                    //Run in Parallel
-                    neuron.neuronInputs[x].backPropogationError += backPropErrorResult[y, x];
-                    neuron.weights[x] += changeDeltaResult[y, x];
-                    neuron.previousChangeDelta[x] = changeDeltaResult[y, x];
-                    //Propogate the error back to previous layer neuron
+                    for (int x = 0; x < neuron.weights.Length; x++)
+                    {
+                        //Run in Parallel
+                        neuron.neuronInputs[x].backPropogationError += backPropErrorResult[y, x];
+                    }
+                },
+                () =>
+                {
+                    for (int x = 0; x < neuron.weights.Length; x++)
+                    {
+                        neuron.weights[x] += changeDeltaResult[y, x];
+                    }
+                },
+                () =>
+                {
+                    for (int x = 0; x < neuron.weights.Length; x++)
+                    {
+                        //Run in Parallel                      
+                        neuron.previousChangeDelta[x] = changeDeltaResult[y, x];
+                        //Propogate the error back to previous layer neuron
+                    }
+                },
+                () =>
+                {
+                    ModifyBias(neuron, errors[y]);
+                    neuron.hasUpdated = true;
                 }
-                ModifyBias(neuron, errors[y]);
-                neuron.hasUpdated = true;
-            }
+                );
+            });
             //Modify Bias
             //Console.WriteLine("5: " + stopwatch.ElapsedMilliseconds);
 
@@ -207,10 +249,10 @@ namespace NeuralNetwork.teach
         {
             int tidy = thread.blockIdx.x;
             int tidx = thread.blockIdx.y;
-         
-                changeDelta[tidx, tidy] = (error[tidx] * inputs[tidx, tidy]) * learnRate + previousChangeDelta[tidx, tidy] * momentum;
-                backPropError[tidx, tidy] = error[tidx] * weights[tidx, tidy];
-            
+
+            changeDelta[tidx, tidy] = (error[tidx] * inputs[tidx, tidy]) * learnRate + previousChangeDelta[tidx, tidy] * momentum;
+            backPropError[tidx, tidy] = error[tidx] * weights[tidx, tidy];
+
         }
 
         public void TrainLayerNeurons(Neuron[] neurons)
